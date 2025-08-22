@@ -27,19 +27,19 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv sync --dev
+        uv sync --dev --python ${{ matrix.python-version }}
 
     - name: Check code formatting
       run: |
-        uv run ruff format --check .
+        uv run --python ${{ matrix.python-version }} ruff format --check .
 
     - name: Run linting
       run: |
-        uv run ruff check .
+        uv run --python ${{ matrix.python-version }} ruff check .
 
     - name: Run tests
       run: |
-        uv run pytest --cov=python_template --cov-report=xml
+        uv run --python ${{ matrix.python-version }} pytest
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
