@@ -69,10 +69,10 @@ python-template/
    ```bash
    # macOS and Linux
    curl -LsSf https://astral.sh/uv/install.sh | sh
-   
+
    # Windows
    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-   
+
    # Or with pip
    pip install uv
    ```
@@ -81,10 +81,10 @@ python-template/
    ```bash
    git clone https://github.com/yourusername/python-template.git
    cd python-template
-   
+
    # Install dependencies
    uv sync --dev
-   
+
    # Install the package in development mode
    uv pip install -e .
    ```
@@ -93,7 +93,7 @@ python-template/
    ```bash
    # Test the CLI
    uv run python -m python_template.cli --help
-   
+
    # Run the demo
    uv run python -m python_template.cli demo
    ```

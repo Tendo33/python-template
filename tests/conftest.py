@@ -3,8 +3,6 @@
 This module contains shared fixtures and configuration for all tests.
 """
 
-
-
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
@@ -21,7 +19,10 @@ def setup_test_logging():
     """Setup logging for tests."""
     setup_logging(
         level="DEBUG",
-        format_string="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>",
+        format_string=(
+            "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
+            "<cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>"
+        ),
     )
 
 
@@ -49,7 +50,7 @@ def sample_config() -> Dict[str, Any]:
             "timeout": 5,
             "max_retries": 1,
             "buffer_size": 512,
-        }
+        },
     }
 
 
@@ -64,12 +65,15 @@ def config_manager(sample_config) -> ConfigManager:
 @pytest.fixture
 def template_core() -> TemplateCore:
     """Create a TemplateCore instance for testing."""
-    return TemplateCore("test-core", {
-        "debug": True,
-        "timeout": 5,
-        "max_retries": 1,
-        "buffer_size": 512,
-    })
+    return TemplateCore(
+        "test-core",
+        {
+            "debug": True,
+            "timeout": 5,
+            "max_retries": 1,
+            "buffer_size": 512,
+        },
+    )
 
 
 @pytest.fixture
@@ -80,13 +84,7 @@ def sample_data():
         "numbers": [1, 2, 3, 4, 5],
         "mixed": ["test", 42, 3.14, True, None],
         "empty": [],
-        "nested": {
-            "level1": {
-                "level2": {
-                    "value": "nested_value"
-                }
-            }
-        }
+        "nested": {"level1": {"level2": {"value": "nested_value"}}},
     }
 
 
@@ -94,19 +92,19 @@ def sample_data():
 def json_file(temp_dir):
     """Create a temporary JSON file for testing."""
     import json
-    
+
     test_data = {
         "app": {
             "name": "json-test",
             "debug": False,
         },
-        "test_value": 42
+        "test_value": 42,
     }
-    
+
     json_file = temp_dir / "test_config.json"
     with open(json_file, "w") as f:
         json.dump(test_data, f)
-    
+
     return json_file
 
 
@@ -114,23 +112,23 @@ def json_file(temp_dir):
 def test_files(temp_dir):
     """Create test files for file operations."""
     files = {}
-    
+
     # 创建文本文件
     text_file = temp_dir / "test.txt"
     text_file.write_text("Hello, World!\nThis is a test file.\n")
     files["text"] = text_file
-    
+
     # 创建二进制文件
     binary_file = temp_dir / "test.bin"
     binary_file.write_bytes(b"\x00\x01\x02\x03\x04\x05")
     files["binary"] = binary_file
-    
+
     # 创建大文件
     large_file = temp_dir / "large.txt"
     large_content = "A" * 10000  # 10KB 文件
     large_file.write_text(large_content)
     files["large"] = large_file
-    
+
     return files
 
 
@@ -143,26 +141,23 @@ def mock_env_vars(monkeypatch):
         "PYTHON_TEMPLATE_LOGGING_LEVEL": "WARNING",
         "PYTHON_TEMPLATE_PERFORMANCE_TIMEOUT": "15",
     }
-    
+
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
-    
+
     return env_vars
 
 
 # Pytest 插件钩子
+
 
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "unit: marks tests as unit tests"
-    )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "unit: marks tests as unit tests")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -171,13 +166,15 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.nodeid:
             item.add_marker(pytest.mark.slow)
-        
+
         # 根据测试名称自动添加单元测试标记
         if "test_unit" in item.name or item.fspath.basename.startswith("test_unit"):
             item.add_marker(pytest.mark.unit)
-        
+
         # 根据测试名称自动添加集成测试标记
-        if "test_integration" in item.name or item.fspath.basename.startswith("test_integration"):
+        if "test_integration" in item.name or item.fspath.basename.startswith(
+            "test_integration"
+        ):
             item.add_marker(pytest.mark.integration)
 
 

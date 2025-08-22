@@ -2,5 +2,3 @@
 
 This package contains all test modules for the python-template project.
 """
-
-

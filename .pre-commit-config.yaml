@@ -34,5 +34,5 @@ repos:
   #       args: [--ignore-missing-imports]
 
 # Configuration for pre-commit
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false

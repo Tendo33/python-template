@@ -321,7 +321,7 @@ from python_template.utils import ContextTimer
 with ContextTimer("data_processing"):
     # Long-running operation
     process_large_dataset()
-    
+
 # Logs: "Operation 'data_processing' completed in 2.3456 seconds"
 ```
 
@@ -377,7 +377,7 @@ logger = get_logger("performance")
 # Monitor operation performance
 with ContextTimer("database_query") as timer:
     result = execute_complex_query()
-    
+
     # Check if operation was slow
     if timer.elapsed_time > 5.0:
         logger.warning(

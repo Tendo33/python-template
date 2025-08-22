@@ -5,8 +5,6 @@ including loguru for logging, ruff for linting and formatting, and uv for
 package management.
 """
 
-
-
 __version__ = "0.1.0"
 __author__ = "Your Name"
 __email__ = "your.email@example.com"

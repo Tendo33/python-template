@@ -45,7 +45,7 @@ pip install uv
    ```bash
    # Install all dependencies including development tools
    uv sync --dev
-   
+
    # Install the package in development mode
    uv pip install -e .
    ```
@@ -54,7 +54,7 @@ pip install uv
    ```bash
    # Test the CLI
    uv run python -m python_template.cli --help
-   
+
    # Run tests
    uv run pytest
    ```

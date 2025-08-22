@@ -4,8 +4,6 @@ This module provides a centralized logging configuration using loguru,
 a modern and powerful logging library for Python.
 """
 
-
-
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -27,7 +25,7 @@ def setup_logging(
     catch: bool = True,
 ) -> None:
     """Setup loguru logging configuration.
-    
+
     Args:
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         format_string: Custom format string for log messages
@@ -43,7 +41,7 @@ def setup_logging(
     """
     # 移除默认的处理器
     logger.remove()
-    
+
     # 默认格式字符串
     if format_string is None:
         if serialize:
@@ -55,7 +53,7 @@ def setup_logging(
                 "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
                 "<level>{message}</level>"
             )
-    
+
     # 控制台输出处理器
     logger.add(
         sys.stderr,
@@ -67,12 +65,12 @@ def setup_logging(
         catch=catch,
         serialize=serialize,
     )
-    
+
     # 文件输出处理器（如果指定了日志文件）
     if log_file:
         log_path = Path(log_file)
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         logger.add(
             log_path,
             level=level,
@@ -90,10 +88,10 @@ def setup_logging(
 
 def get_logger(name: Optional[str] = None) -> Any:
     """Get a logger instance.
-    
+
     Args:
         name: Logger name (optional)
-        
+
     Returns:
         Logger instance
     """
@@ -108,7 +106,7 @@ def configure_json_logging(
     extra_fields: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Configure JSON structured logging.
-    
+
     Args:
         level: Logging level
         log_file: Path to log file
@@ -116,12 +114,12 @@ def configure_json_logging(
     """
     if extra_fields is None:
         extra_fields = {}
-    
+
     # JSON格式化函数
     def json_formatter(record: Dict[str, Any]) -> str:
         """Format log record as JSON."""
         import json
-        
+
         # 基础字段
         log_entry = {
             "timestamp": record["time"].isoformat(),
@@ -132,10 +130,10 @@ def configure_json_logging(
             "line": record["line"],
             "message": record["message"],
         }
-        
+
         # 添加额外字段
         log_entry.update(extra_fields)
-        
+
         # 如果有异常信息，添加异常详情
         if record.get("exception"):
             log_entry["exception"] = {
@@ -143,9 +141,9 @@ def configure_json_logging(
                 "value": str(record["exception"].value),
                 "traceback": record["exception"].traceback,
             }
-        
+
         return json.dumps(log_entry, ensure_ascii=False)
-    
+
     # 重新配置日志
     setup_logging(
         level=level,
@@ -157,42 +155,41 @@ def configure_json_logging(
 
 def log_function_calls(func):
     """Decorator to log function calls with parameters and return values.
-    
+
     Args:
         func: Function to be decorated
-        
+
     Returns:
         Decorated function
     """
     from functools import wraps
-    
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         func_logger = get_logger(f"{func.__module__}.{func.__name__}")
-        
+
         # 记录函数调用
-        func_logger.debug(
-            f"Calling {func.__name__} with args={args}, kwargs={kwargs}"
-        )
-        
+        func_logger.debug(f"Calling {func.__name__} with args={args}, kwargs={kwargs}")
+
         try:
             # 执行函数
             result = func(*args, **kwargs)
-            
+
             # 记录返回值
             func_logger.debug(f"{func.__name__} returned: {result}")
-            
+
             return result
         except Exception as e:
             # 记录异常
             func_logger.exception(f"Exception in {func.__name__}: {e}")
             raise
-    
+
     return wrapper
 
 
 # 预配置的日志器实例
 default_logger = get_logger("python_template")
+
 
 # 便捷的日志函数
 def debug(message: str, **kwargs) -> None:

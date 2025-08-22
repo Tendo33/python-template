@@ -37,10 +37,7 @@ def check_pre_commit_installed() -> bool:
     """
     try:
         result = subprocess.run(
-            ["pre-commit", "--version"], 
-            capture_output=True, 
-            text=True, 
-            check=False
+            ["pre-commit", "--version"], capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
             print(f"✅ pre-commit is installed: {result.stdout.strip()}")
@@ -60,7 +57,7 @@ def install_pre_commit_hooks(project_root: Path) -> int:
         Exit code (0 for success, non-zero for error)
     """
     config_file = project_root / ".pre-commit-config.yaml"
-    
+
     if not config_file.exists():
         print(f"❌ Pre-commit config file not found: {config_file}")
         return 1
@@ -119,9 +116,7 @@ Examples:
         "--update", action="store_true", help="Update hooks to latest versions"
     )
 
-    parser.add_argument(
-        "--test", action="store_true", help="Test hooks on all files"
-    )
+    parser.add_argument("--test", action="store_true", help="Test hooks on all files")
 
     parser.add_argument(
         "--all", action="store_true", help="Install, update, and test hooks"
