@@ -167,16 +167,41 @@ cd python-template
 # Install dependencies (including dev dependencies)
 uv sync --dev
 
-# Install pre-commit hooks (optional)
-uv run pre-commit install
+# Setup pre-commit hooks for automatic formatting (recommended)
+python scripts/setup_pre_commit.py
 ```
 
 ### Development Workflow
 
-#### Code Formatting
+#### Automatic Code Formatting with Pre-commit
+
+**🎯 Recommended: Automatic formatting on every commit**
 
 ```bash
-# Format code
+# Setup pre-commit hooks (one-time setup)
+python scripts/setup_pre_commit.py
+
+# Update hooks to latest versions
+python scripts/setup_pre_commit.py --update
+
+# Test hooks on all files
+python scripts/setup_pre_commit.py --test
+
+# Complete setup (install + update + test)
+python scripts/setup_pre_commit.py --all
+```
+
+Once installed, `ruff format` will automatically run on every commit, ensuring consistent code formatting.
+
+**Bypass hooks temporarily (if needed):**
+```bash
+git commit --no-verify
+```
+
+#### Manual Code Formatting
+
+```bash
+# Format code manually
 python scripts/format.py
 
 # Check formatting without changes
