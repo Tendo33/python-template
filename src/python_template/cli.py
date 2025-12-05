@@ -6,9 +6,10 @@ This module provides a command line interface for the python-template package.
 import sys
 from typing import List, Optional
 
+from utils import get_logger, setup_logging
+
 from .config import get_config
 from .core import TemplateCore
-from .logger import get_logger, setup_logging
 
 logger = get_logger(__name__)
 

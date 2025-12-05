@@ -11,8 +11,9 @@ __email__ = "your.email@example.com"
 __description__ = "A modern Python project template with loguru, ruff, and uv"
 
 # 导出主要的公共API
+from utils import get_logger, setup_logging
+
 from .core import TemplateCore
-from .logger import get_logger, setup_logging
 
 __all__ = [
     "TemplateCore",

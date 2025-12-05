@@ -1,272 +1,30 @@
-"""Utility functions module.
+"""Common utility functions module.
 
-This module provides various utility functions that can be used
-throughout the application.
+提供各种通用的工具函数。
 """
 
-import hashlib
-import json
-import time
-from datetime import datetime, timezone
-from functools import wraps
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+import re
+import traceback
+import uuid
+from typing import Any, Dict, List, Optional
 
 from .logger_util import get_logger
 
 logger = get_logger(__name__)
 
 
-def timing_decorator(func: Callable) -> Callable:
-    """Decorator to measure function execution time.
-
-    Args:
-        func: Function to be decorated
-
-    Returns:
-        Decorated function
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        try:
-            result = func(*args, **kwargs)
-            return result
-        finally:
-            end_time = time.perf_counter()
-            execution_time = end_time - start_time
-            logger.debug(
-                f"Function '{func.__name__}' executed in {execution_time:.4f} seconds"
-            )
-
-    return wrapper
-
-
-def retry_decorator(
-    max_retries: int = 3,
-    delay: float = 1.0,
-    backoff: float = 2.0,
-    exceptions: Tuple[Exception, ...] = (Exception,),
-) -> Callable:
-    """Decorator to retry function execution on failure.
-
-    Args:
-        max_retries: Maximum number of retry attempts
-        delay: Initial delay between retries in seconds
-        backoff: Multiplier for delay after each retry
-        exceptions: Tuple of exception types to catch
-
-    Returns:
-        Decorator function
-    """
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            current_delay = delay
-            last_exception = None
-
-            for attempt in range(max_retries + 1):
-                try:
-                    return func(*args, **kwargs)
-                except exceptions as e:
-                    last_exception = e
-                    if attempt < max_retries:
-                        logger.warning(
-                            f"Function '{func.__name__}' failed (attempt {attempt + 1}/"
-                            f"{max_retries + 1}): {e}. Retrying in {current_delay:.2f}s"
-                        )
-                        time.sleep(current_delay)
-                        current_delay *= backoff
-                    else:
-                        logger.error(
-                            f"Function '{func.__name__}' failed after "
-                            f"{max_retries + 1} attempts: {e}"
-                        )
-
-            raise last_exception
-
-        return wrapper
-
-    return decorator
-
-
-def safe_json_loads(json_str: str, default: Any = None) -> Any:
-    """Safely parse JSON string.
-
-    Args:
-        json_str: JSON string to parse
-        default: Default value to return on parse error
-
-    Returns:
-        Parsed JSON data or default value
-    """
-    try:
-        return json.loads(json_str)
-    except (json.JSONDecodeError, TypeError) as e:
-        logger.debug(f"Failed to parse JSON: {e}")
-        return default
-
-
-def safe_json_dumps(obj: Any, default: Any = None, **kwargs) -> Optional[str]:
-    """Safely serialize object to JSON string.
-
-    Args:
-        obj: Object to serialize
-        default: Default serializer for non-serializable objects
-        **kwargs: Additional arguments for json.dumps
-
-    Returns:
-        JSON string or None on error
-    """
-    try:
-        return json.dumps(obj, default=default, ensure_ascii=False, **kwargs)
-    except (TypeError, ValueError) as e:
-        logger.debug(f"Failed to serialize to JSON: {e}")
-        return None
-
-
-def calculate_file_hash(file_path: Union[str, Path], algorithm: str = "sha256") -> str:
-    """Calculate hash of a file.
-
-    Args:
-        file_path: Path to the file
-        algorithm: Hash algorithm to use
-
-    Returns:
-        Hex digest of the file hash
-
-    Raises:
-        FileNotFoundError: If file doesn't exist
-        ValueError: If algorithm is not supported
-    """
-    file_path = Path(file_path)
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-
-    try:
-        hasher = hashlib.new(algorithm)
-    except ValueError:
-        raise ValueError(f"Unsupported hash algorithm: {algorithm}") from None
-
-    logger.debug(f"Calculating {algorithm} hash for: {file_path}")
-
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
-            hasher.update(chunk)
-
-    hash_value = hasher.hexdigest()
-    logger.debug(f"File hash ({algorithm}): {hash_value}")
-    return hash_value
-
-
-def ensure_directory(directory_path: Union[str, Path]) -> Path:
-    """Ensure directory exists, create if it doesn't.
-
-    Args:
-        directory_path: Path to the directory
-
-    Returns:
-        Path object of the directory
-    """
-    dir_path = Path(directory_path)
-    dir_path.mkdir(parents=True, exist_ok=True)
-    logger.debug(f"Ensured directory exists: {dir_path}")
-    return dir_path
-
-
-def get_file_size(file_path: Union[str, Path]) -> int:
-    """Get file size in bytes.
-
-    Args:
-        file_path: Path to the file
-
-    Returns:
-        File size in bytes
-
-    Raises:
-        FileNotFoundError: If file doesn't exist
-    """
-    file_path = Path(file_path)
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-
-    size = file_path.stat().st_size
-    logger.debug(f"File size: {file_path} = {size} bytes")
-    return size
-
-
-def format_file_size(size_bytes: int) -> str:
-    """Format file size in human-readable format.
-
-    Args:
-        size_bytes: Size in bytes
-
-    Returns:
-        Formatted size string
-    """
-    if size_bytes == 0:
-        return "0 B"
-
-    size_names = ["B", "KB", "MB", "GB", "TB"]
-    import math
-
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-
-    return f"{s} {size_names[i]}"
-
-
-def get_timestamp(include_timezone: bool = True) -> str:
-    """Get current timestamp as ISO format string.
-
-    Args:
-        include_timezone: Whether to include timezone information
-
-    Returns:
-        ISO format timestamp string
-    """
-    if include_timezone:
-        return datetime.now(timezone.utc).isoformat()
-    else:
-        return datetime.now().isoformat()
-
-
-def parse_timestamp(timestamp_str: str) -> datetime:
-    """Parse ISO format timestamp string to datetime object.
-
-    Args:
-        timestamp_str: ISO format timestamp string
-
-    Returns:
-        datetime object
-
-    Raises:
-        ValueError: If timestamp format is invalid
-    """
-    try:
-        return datetime.fromisoformat(timestamp_str)
-    except ValueError as e:
-        logger.error(f"Invalid timestamp format: {timestamp_str}")
-        raise ValueError(f"Invalid timestamp format: {e}") from e
-
-
 def chunk_list(data: List[Any], chunk_size: int) -> List[List[Any]]:
-    """Split list into chunks of specified size.
+    """将列表分割成指定大小的块。
 
     Args:
-        data: List to split
-        chunk_size: Size of each chunk
+        data: 要分割的列表
+        chunk_size: 每个块的大小
 
     Returns:
-        List of chunks
+        分割后的列表
 
     Raises:
-        ValueError: If chunk_size is not positive
+        ValueError: 如果 chunk_size 不是正数
     """
     if chunk_size <= 0:
         raise ValueError("Chunk size must be positive")
@@ -282,15 +40,15 @@ def chunk_list(data: List[Any], chunk_size: int) -> List[List[Any]]:
 def flatten_dict(
     nested_dict: Dict[str, Any], separator: str = ".", prefix: str = ""
 ) -> Dict[str, Any]:
-    """Flatten nested dictionary.
+    """展平嵌套字典。
 
     Args:
-        nested_dict: Nested dictionary to flatten
-        separator: Separator for nested keys
-        prefix: Prefix for keys
+        nested_dict: 嵌套字典
+        separator: 键的分隔符
+        prefix: 键的前缀
 
     Returns:
-        Flattened dictionary
+        展平后的字典
     """
     flattened = {}
 
@@ -308,14 +66,14 @@ def flatten_dict(
 def unflatten_dict(
     flattened_dict: Dict[str, Any], separator: str = "."
 ) -> Dict[str, Any]:
-    """Unflatten dictionary back to nested structure.
+    """将展平的字典还原为嵌套结构。
 
     Args:
-        flattened_dict: Flattened dictionary
-        separator: Separator used in flattened keys
+        flattened_dict: 展平的字典
+        separator: 键的分隔符
 
     Returns:
-        Nested dictionary
+        嵌套字典
     """
     unflattened = {}
 
@@ -334,13 +92,13 @@ def unflatten_dict(
 
 
 def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
-    """Merge multiple dictionaries.
+    """合并多个字典。
 
     Args:
-        *dicts: Dictionaries to merge
+        *dicts: 要合并的字典
 
     Returns:
-        Merged dictionary
+        合并后的字典
     """
     merged = {}
 
@@ -356,15 +114,15 @@ def filter_dict(
     allowed_keys: Optional[List[str]] = None,
     excluded_keys: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
-    """Filter dictionary by allowed or excluded keys.
+    """根据允许或排除的键过滤字典。
 
     Args:
-        data: Dictionary to filter
-        allowed_keys: List of allowed keys (whitelist)
-        excluded_keys: List of excluded keys (blacklist)
+        data: 要过滤的字典
+        allowed_keys: 允许的键列表(白名单)
+        excluded_keys: 排除的键列表(黑名单)
 
     Returns:
-        Filtered dictionary
+        过滤后的字典
     """
     if allowed_keys is not None:
         return {k: v for k, v in data.items() if k in allowed_keys}
@@ -376,93 +134,270 @@ def filter_dict(
 
 
 def validate_email(email: str) -> bool:
-    """Basic email validation.
+    """基本的邮箱地址验证。
 
     Args:
-        email: Email address to validate
+        email: 邮箱地址
 
     Returns:
-        True if email format is valid, False otherwise
+        有效返回 True,否则返回 False
     """
-    import re
-
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
 def generate_uuid() -> str:
-    """Generate UUID4 string.
+    """生成 UUID4 字符串。
 
     Returns:
-        UUID4 string
+        UUID4 字符串
     """
-    import uuid
-
     return str(uuid.uuid4())
 
 
-def sanitize_filename(filename: str) -> str:
-    """Sanitize filename by removing/replacing invalid characters.
+def deep_copy_dict(source: Dict[str, Any]) -> Dict[str, Any]:
+    """深拷贝字典。
 
     Args:
-        filename: Original filename
+        source: 源字典
 
     Returns:
-        Sanitized filename
+        深拷贝后的字典
     """
-    import re
+    import copy
 
-    # 移除或替换无效字符
-    sanitized = re.sub(r'[<>:"/\\|?*]', "_", filename)
-
-    # 移除控制字符
-    sanitized = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", sanitized)
-
-    # 限制长度
-    if len(sanitized) > 255:
-        name, ext = Path(sanitized).stem, Path(sanitized).suffix
-        max_name_len = 255 - len(ext)
-        sanitized = name[:max_name_len] + ext
-
-    return sanitized.strip()
+    return copy.deepcopy(source)
 
 
-class ContextTimer:
-    """Context manager for timing code execution."""
+def deep_merge_dict(base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:
+    """深度合并两个字典。
 
-    def __init__(self, name: str = "operation"):
-        """Initialize timer.
+    Args:
+        base: 基础字典
+        update: 更新字典
 
-        Args:
-            name: Name of the operation being timed
-        """
-        self.name = name
-        self.start_time = None
-        self.end_time = None
+    Returns:
+        合并后的字典
+    """
+    result = base.copy()
 
-    def __enter__(self):
-        """Start timing."""
-        self.start_time = time.perf_counter()
-        logger.debug(f"Starting timer for: {self.name}")
-        return self
+    for key, value in update.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge_dict(result[key], value)
+        else:
+            result[key] = value
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Stop timing and log result."""
-        self.end_time = time.perf_counter()
-        execution_time = self.end_time - self.start_time
-        logger.info(
-            f"Operation '{self.name}' completed in {execution_time:.4f} seconds"
-        )
+    return result
 
-    @property
-    def elapsed_time(self) -> Optional[float]:
-        """Get elapsed time.
 
-        Returns:
-            Elapsed time in seconds or None if not completed
-        """
-        if self.start_time is None:
-            return None
+def safe_get(
+    data: Dict[str, Any],
+    key_path: str,
+    default: Any = None,
+    separator: str = ".",
+) -> Any:
+    """安全地从嵌套字典中获取值。
 
-        end_time = self.end_time or time.perf_counter()
-        return end_time - self.start_time
+    Args:
+        data: 字典数据
+        key_path: 键路径,使用分隔符分隔
+        default: 默认值
+        separator: 分隔符
+
+    Returns:
+        获取的值,失败时返回 default
+
+    Example:
+        >>> data = {"a": {"b": {"c": 123}}}
+        >>> safe_get(data, "a.b.c")
+        123
+        >>> safe_get(data, "a.b.d", default=0)
+        0
+    """
+    try:
+        keys = key_path.split(separator)
+        current = data
+
+        for key in keys:
+            current = current[key]
+
+        return current
+    except (KeyError, TypeError, AttributeError):
+        return default
+
+
+def safe_set(
+    data: Dict[str, Any],
+    key_path: str,
+    value: Any,
+    separator: str = ".",
+    create_missing: bool = True,
+) -> bool:
+    """安全地设置嵌套字典中的值。
+
+    Args:
+        data: 字典数据
+        key_path: 键路径,使用分隔符分隔
+        value: 要设置的值
+        separator: 分隔符
+        create_missing: 是否创建缺失的中间字典
+
+    Returns:
+        成功返回 True,失败返回 False
+
+    Example:
+        >>> data = {}
+        >>> safe_set(data, "a.b.c", 123)
+        True
+        >>> data
+        {'a': {'b': {'c': 123}}}
+    """
+    try:
+        keys = key_path.split(separator)
+        current = data
+
+        for key in keys[:-1]:
+            if key not in current:
+                if create_missing:
+                    current[key] = {}
+                else:
+                    return False
+            current = current[key]
+
+        current[keys[-1]] = value
+        return True
+    except (TypeError, AttributeError) as e:
+        logger.error(f"Failed to set value at '{key_path}': {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return False
+
+
+def remove_none_values(data: Dict[str, Any], recursive: bool = False) -> Dict[str, Any]:
+    """移除字典中值为 None 的项。
+
+    Args:
+        data: 字典数据
+        recursive: 是否递归处理嵌套字典
+
+    Returns:
+        处理后的字典
+    """
+    result = {}
+
+    for key, value in data.items():
+        if value is None:
+            continue
+
+        if recursive and isinstance(value, dict):
+            result[key] = remove_none_values(value, recursive=True)
+        else:
+            result[key] = value
+
+    return result
+
+
+def remove_empty_values(
+    data: Dict[str, Any],
+    recursive: bool = False,
+) -> Dict[str, Any]:
+    """移除字典中的空值(None, "", [], {})。
+
+    Args:
+        data: 字典数据
+        recursive: 是否递归处理嵌套字典
+
+    Returns:
+        处理后的字典
+    """
+    result = {}
+
+    for key, value in data.items():
+        # 检查是否为空值
+        if value is None or value == "" or value == [] or value == {}:
+            continue
+
+        if recursive and isinstance(value, dict):
+            result[key] = remove_empty_values(value, recursive=True)
+        else:
+            result[key] = value
+
+    return result
+
+
+def batch_process(
+    items: List[Any],
+    batch_size: int,
+    process_func,
+    *args,
+    **kwargs,
+) -> List[Any]:
+    """批量处理列表项。
+
+    Args:
+        items: 要处理的项列表
+        batch_size: 批次大小
+        process_func: 处理函数
+        *args: 传递给处理函数的额外参数
+        **kwargs: 传递给处理函数的额外关键字参数
+
+    Returns:
+        处理结果列表
+    """
+    results = []
+    batches = chunk_list(items, batch_size)
+
+    for i, batch in enumerate(batches):
+        logger.debug(f"Processing batch {i + 1}/{len(batches)}")
+        try:
+            batch_result = process_func(batch, *args, **kwargs)
+            results.extend(batch_result if isinstance(batch_result, list) else [batch_result])
+        except Exception as e:
+            logger.error(f"Error processing batch {i + 1}: {e}")
+            logger.debug(f"Traceback:\n{traceback.format_exc()}")
+
+    return results
+
+
+def retry_on_exception(
+    func,
+    max_retries: int = 3,
+    delay: float = 1.0,
+    *args,
+    **kwargs,
+) -> Any:
+    """重试执行函数直到成功或达到最大重试次数。
+
+    Args:
+        func: 要执行的函数
+        max_retries: 最大重试次数
+        delay: 重试间隔(秒)
+        *args: 传递给函数的参数
+        **kwargs: 传递给函数的关键字参数
+
+    Returns:
+        函数执行结果
+
+    Raises:
+        最后一次执行的异常
+    """
+    import time
+
+    last_exception = None
+
+    for attempt in range(max_retries + 1):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            last_exception = e
+            if attempt < max_retries:
+                logger.warning(
+                    f"Attempt {attempt + 1}/{max_retries + 1} failed: {e}. "
+                    f"Retrying in {delay}s..."
+                )
+                logger.debug(f"Traceback:\n{traceback.format_exc()}")
+                time.sleep(delay)
+            else:
+                logger.error(f"All {max_retries + 1} attempts failed")
+                logger.debug(f"Traceback:\n{traceback.format_exc()}")
+
+    raise last_exception
