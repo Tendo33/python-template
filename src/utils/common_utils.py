@@ -12,7 +12,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from .logger import get_logger
+from .logger_util import get_logger
 
 logger = get_logger(__name__)
 
