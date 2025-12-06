@@ -251,9 +251,8 @@ class TestContextTimer:
 
     def test_context_timer_with_exception(self) -> None:
         """Test context timer handles exceptions."""
-        with pytest.raises(ValueError):
-            with ContextTimer("failing") as timer:
-                raise ValueError("Test error")
+        with pytest.raises(ValueError), ContextTimer("failing") as timer:
+            raise ValueError("Test error")
 
         # Timer should still record elapsed time
         assert timer.elapsed_time is not None

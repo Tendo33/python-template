@@ -34,7 +34,7 @@ def read_json(
             logger.warning(f"JSON file not found: {file_path}")
             return default
 
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             data = json.load(f)
             logger.debug(f"Successfully read JSON from: {file_path}")
             return data
