@@ -30,15 +30,16 @@ A modern Python project template featuring:
 python-template/
 ├── src/python_template/     # Source code (importable package)
 │   ├── __init__.py          # Package initialization
-│   ├── core.py              # Core business logic
-│   ├── config.py            # Configuration management
 │   ├── logger.py            # Logging setup and utilities
-│   ├── utils.py             # Utility functions
-│   └── cli.py               # Command-line interface
+│   ├── utils/               # Utility modules
+│   │   ├── file_utils.py    # File operations
+│   │   ├── date_utils.py    # Date/time utilities
+│   │   └── ...
+│   └── models/              # Data models
 ├── tests/                   # Test suite
 │   ├── conftest.py          # Pytest configuration and fixtures
-│   ├── test_core.py         # Core functionality tests
-│   └── test_logger.py       # Logging tests
+│   ├── test_logger.py       # Logging tests
+│   └── test_utils.py        # Utility tests
 ├── scripts/                 # Development scripts
 │   ├── format.py            # Code formatting script
 │   └── lint.py              # Linting script
