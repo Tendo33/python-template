@@ -16,14 +16,14 @@ T = TypeVar("T")
 
 class Context:
     """Thread-safe context for storing runtime values.
-    
+
     线程安全的运行时值存储上下文。
-    
+
     This class provides a dictionary-like interface for storing and retrieving
     values during application runtime. All operations are thread-safe.
-    
+
     该类提供类似字典的接口用于在应用运行时存储和检索值。所有操作都是线程安全的。
-    
+
     Example:
         >>> ctx = Context()
         >>> ctx.set("user_id", 123)
@@ -35,9 +35,9 @@ class Context:
 
     def __init__(self, name: str = "default") -> None:
         """Initialize context.
-        
+
         初始化上下文。
-        
+
         Args:
             name: Context name for identification
         """
@@ -47,9 +47,9 @@ class Context:
 
     def set(self, key: str, value: Any) -> None:
         """Set a value in the context.
-        
+
         在上下文中设置值。
-        
+
         Args:
             key: Key to store value under
             value: Value to store
@@ -59,13 +59,13 @@ class Context:
 
     def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
         """Get a value from the context.
-        
+
         从上下文中获取值。
-        
+
         Args:
             key: Key to retrieve
             default: Default value if key not found
-            
+
         Returns:
             Value associated with key, or default if not found
         """
@@ -74,12 +74,12 @@ class Context:
 
     def delete(self, key: str) -> bool:
         """Delete a value from the context.
-        
+
         从上下文中删除值。
-        
+
         Args:
             key: Key to delete
-            
+
         Returns:
             True if key was deleted, False if key didn't exist
         """
@@ -91,12 +91,12 @@ class Context:
 
     def has(self, key: str) -> bool:
         """Check if a key exists in the context.
-        
+
         检查键是否存在于上下文中。
-        
+
         Args:
             key: Key to check
-            
+
         Returns:
             True if key exists, False otherwise
         """
@@ -105,7 +105,7 @@ class Context:
 
     def clear(self) -> None:
         """Clear all values from the context.
-        
+
         清除上下文中的所有值。
         """
         with self._lock:
@@ -113,9 +113,9 @@ class Context:
 
     def keys(self) -> list[str]:
         """Get all keys in the context.
-        
+
         获取上下文中的所有键。
-        
+
         Returns:
             List of all keys
         """
@@ -124,9 +124,9 @@ class Context:
 
     def values(self) -> list[Any]:
         """Get all values in the context.
-        
+
         获取上下文中的所有值。
-        
+
         Returns:
             List of all values
         """
@@ -135,9 +135,9 @@ class Context:
 
     def items(self) -> list[tuple[str, Any]]:
         """Get all key-value pairs in the context.
-        
+
         获取上下文中的所有键值对。
-        
+
         Returns:
             List of (key, value) tuples
         """
@@ -146,9 +146,9 @@ class Context:
 
     def update(self, data: Dict[str, Any]) -> None:
         """Update context with multiple key-value pairs.
-        
+
         使用多个键值对更新上下文。
-        
+
         Args:
             data: Dictionary of key-value pairs to add
         """
@@ -157,9 +157,9 @@ class Context:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert context to dictionary.
-        
+
         将上下文转换为字典。
-        
+
         Returns:
             Copy of internal data dictionary
         """
@@ -168,7 +168,7 @@ class Context:
 
     def __len__(self) -> int:
         """Get number of items in context.
-        
+
         获取上下文中的项目数量。
         """
         with self._lock:
@@ -176,7 +176,7 @@ class Context:
 
     def __repr__(self) -> str:
         """String representation of context.
-        
+
         上下文的字符串表示。
         """
         with self._lock:
@@ -185,14 +185,14 @@ class Context:
 
 class ContextManager:
     """Manager for multiple context scopes.
-    
+
     多上下文作用域管理器。
-    
+
     This class manages multiple named contexts and provides utilities for
     working with scoped contexts.
-    
+
     该类管理多个命名上下文并提供用于处理作用域上下文的工具。
-    
+
     Example:
         >>> manager = ContextManager()
         >>> manager.create_context("request")
@@ -203,7 +203,7 @@ class ContextManager:
 
     def __init__(self) -> None:
         """Initialize context manager.
-        
+
         初始化上下文管理器。
         """
         self._contexts: Dict[str, Context] = {}
@@ -211,15 +211,15 @@ class ContextManager:
 
     def create_context(self, name: str) -> Context:
         """Create a new named context.
-        
+
         创建新的命名上下文。
-        
+
         Args:
             name: Name for the new context
-            
+
         Returns:
             Newly created context
-            
+
         Raises:
             ValueError: If context with this name already exists
         """
@@ -232,12 +232,12 @@ class ContextManager:
 
     def get_context(self, name: str) -> Optional[Context]:
         """Get a context by name.
-        
+
         通过名称获取上下文。
-        
+
         Args:
             name: Name of context to retrieve
-            
+
         Returns:
             Context if found, None otherwise
         """
@@ -246,12 +246,12 @@ class ContextManager:
 
     def get_or_create_context(self, name: str) -> Context:
         """Get existing context or create new one.
-        
+
         获取现有上下文或创建新上下文。
-        
+
         Args:
             name: Name of context
-            
+
         Returns:
             Existing or newly created context
         """
@@ -262,12 +262,12 @@ class ContextManager:
 
     def delete_context(self, name: str) -> bool:
         """Delete a context by name.
-        
+
         通过名称删除上下文。
-        
+
         Args:
             name: Name of context to delete
-            
+
         Returns:
             True if context was deleted, False if it didn't exist
         """
@@ -279,7 +279,7 @@ class ContextManager:
 
     def clear_all(self) -> None:
         """Clear all contexts.
-        
+
         清除所有上下文。
         """
         with self._lock:
@@ -287,9 +287,9 @@ class ContextManager:
 
     def list_contexts(self) -> list[str]:
         """List all context names.
-        
+
         列出所有上下文名称。
-        
+
         Returns:
             List of context names
         """
@@ -304,15 +304,15 @@ _context_manager: Optional[ContextManager] = None
 
 def get_context(name: str = "global") -> Context:
     """Get or create a global context.
-    
+
     获取或创建全局上下文。
-    
+
     Args:
         name: Context name (default: "global")
-        
+
     Returns:
         Context instance
-        
+
     Example:
         >>> ctx = get_context()
         >>> ctx.set("app_start_time", time.time())
@@ -325,9 +325,9 @@ def get_context(name: str = "global") -> Context:
 
 def get_global_context() -> Context:
     """Get the global application context.
-    
+
     获取全局应用上下文。
-    
+
     Returns:
         Global context instance
     """
@@ -342,21 +342,21 @@ def context_scope(
     name: str, initial_data: Optional[Dict[str, Any]] = None
 ) -> Generator[Context, None, None]:
     """Context manager for scoped context operations.
-    
+
     作用域上下文操作的上下文管理器。
-    
+
     Creates a temporary context that is automatically cleaned up when exiting
     the scope. Useful for request/session-scoped data.
-    
+
     创建临时上下文，在退出作用域时自动清理。适用于请求/会话作用域的数据。
-    
+
     Args:
         name: Name for the scoped context
         initial_data: Optional initial data to populate context
-        
+
     Yields:
         Context instance for the scope
-        
+
     Example:
         >>> with context_scope("request", {"user_id": 123}) as ctx:
         ...     ctx.set("action", "login")
@@ -379,9 +379,9 @@ def context_scope(
 # Convenience functions for common operations / 常用操作的便捷函数
 def set_global(key: str, value: Any) -> None:
     """Set a value in the global context.
-    
+
     在全局上下文中设置值。
-    
+
     Args:
         key: Key to store value under
         value: Value to store
@@ -391,13 +391,13 @@ def set_global(key: str, value: Any) -> None:
 
 def get_global(key: str, default: Optional[T] = None) -> Optional[T]:
     """Get a value from the global context.
-    
+
     从全局上下文中获取值。
-    
+
     Args:
         key: Key to retrieve
         default: Default value if key not found
-        
+
     Returns:
         Value associated with key, or default if not found
     """
@@ -406,7 +406,7 @@ def get_global(key: str, default: Optional[T] = None) -> Optional[T]:
 
 def clear_global() -> None:
     """Clear the global context.
-    
+
     清除全局上下文。
     """
     get_global_context().clear()

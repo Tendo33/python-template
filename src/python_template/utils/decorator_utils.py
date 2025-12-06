@@ -147,7 +147,9 @@ def log_calls(log_args: bool = True, log_result: bool = True) -> Callable:
             func_name = func.__name__
 
             if log_args:
-                logger.debug(f"📞 Calling {func_name} with args={args}, kwargs={kwargs}")
+                logger.debug(
+                    f"📞 Calling {func_name} with args={args}, kwargs={kwargs}"
+                )
             else:
                 logger.debug(f"📞 Calling {func_name}")
 

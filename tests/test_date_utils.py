@@ -5,8 +5,6 @@
 
 from datetime import datetime, timedelta
 
-import pytest
-
 from python_template.utils import (
     add_days,
     add_hours,

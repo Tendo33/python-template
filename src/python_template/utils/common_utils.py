@@ -350,7 +350,9 @@ def batch_process(
         logger.debug(f"Processing batch {i + 1}/{len(batches)}")
         try:
             batch_result = process_func(batch, *args, **kwargs)
-            results.extend(batch_result if isinstance(batch_result, list) else [batch_result])
+            results.extend(
+                batch_result if isinstance(batch_result, list) else [batch_result]
+            )
         except Exception as e:
             logger.error(f"Error processing batch {i + 1}: {e}")
             logger.debug(f"Traceback:\n{traceback.format_exc()}")

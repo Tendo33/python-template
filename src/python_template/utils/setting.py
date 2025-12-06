@@ -25,7 +25,8 @@ class AppSettings(BaseSettings):
     version: str = Field(default="0.1.0", description="Application version")
     debug: bool = Field(default=False, description="Debug mode")
     environment: str = Field(
-        default="development", description="Environment (development/staging/production)"
+        default="development",
+        description="Environment (development/staging/production)",
     )
 
     @field_validator("environment")
@@ -42,9 +43,7 @@ class LoggingSettings(BaseSettings):
     """Logging settings / 日志配置."""
 
     level: str = Field(default="INFO", description="Logging level")
-    format: str = Field(
-        default="standard", description="Log format (standard/json)"
-    )
+    format: str = Field(default="standard", description="Log format (standard/json)")
     file: str = Field(default="", description="Log file path (empty for stdout only)")
     rotation: str = Field(default="10 MB", description="Log rotation size")
     retention: str = Field(default="1 week", description="Log retention period")
@@ -111,14 +110,14 @@ class SecuritySettings(BaseSettings):
 
 class Settings(BaseSettings):
     """Main settings class combining all configuration groups.
-    
+
     主配置类，整合所有配置组。
-    
+
     Configuration priority (highest to lowest):
     1. Environment variables
     2. .env file
     3. Default values
-    
+
     配置优先级（从高到低）：
     1. 环境变量
     2. .env 文件
@@ -146,12 +145,12 @@ class Settings(BaseSettings):
     @classmethod
     def from_env_file(cls, env_file: Optional[Path] = None) -> "Settings":
         """Load settings from a specific .env file.
-        
+
         从指定的.env文件加载配置。
-        
+
         Args:
             env_file: Path to .env file. If None, uses default .env
-            
+
         Returns:
             Settings instance
         """
@@ -161,9 +160,9 @@ class Settings(BaseSettings):
 
     def get_project_root(self) -> Path:
         """Get project root directory.
-        
+
         获取项目根目录。
-        
+
         Returns:
             Path to project root
         """
@@ -174,9 +173,9 @@ class Settings(BaseSettings):
 
     def get_log_file_path(self) -> Optional[Path]:
         """Get absolute path to log file if configured.
-        
+
         获取日志文件的绝对路径（如果已配置）。
-        
+
         Returns:
             Path to log file or None
         """
@@ -198,15 +197,15 @@ _settings: Optional[Settings] = None
 @lru_cache
 def get_settings() -> Settings:
     """Get global settings instance (singleton).
-    
+
     获取全局配置实例（单例模式）。
-    
+
     This function is cached to ensure only one Settings instance exists.
     该函数使用缓存确保只存在一个Settings实例。
-    
+
     Returns:
         Settings instance
-        
+
     Example:
         >>> from utils.setting import get_settings
         >>> settings = get_settings()
@@ -221,18 +220,18 @@ def get_settings() -> Settings:
 
 def reload_settings(env_file: Optional[Path] = None) -> Settings:
     """Reload settings from environment/file.
-    
+
     重新加载配置。
-    
+
     This clears the cache and creates a new Settings instance.
     This is useful for testing or when configuration changes at runtime.
-    
+
     这会清除缓存并创建新的Settings实例。
     在测试或运行时配置更改时很有用。
-    
+
     Args:
         env_file: Optional path to .env file
-        
+
     Returns:
         New Settings instance
     """

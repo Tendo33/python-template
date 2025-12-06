@@ -76,3 +76,35 @@ pythonpath = ["src"]
 
 *   **作为用户**：安装后直接 `import python_template`。
 *   **作为开发者**：在 `tests` 中也是直接 `import python_template`，这是由 `src` 布局规范和 `pytest` 配置共同保证的。永远不要在导入语句中包含 `src`（例如 `from src.python_template import ...` 是错误的写法）。
+
+## 3. 路径问题详解 (Paths Explained)
+
+很多开发者容易混淆 **Import Path (导入路径)** 和 **File Path (文件路径)**。
+
+### 3.1 Import Path (`pythonpath`)
+*   **定义**：Python 解释器查找模块（代码文件）的地方。
+*   **配置**：我们在 `pyproject.toml` 中配置 `pythonpath = ["src"]`，是为了让 Python 知道去 `src` 目录里找 `python_template` 这个包。
+*   **影响**：这只影响 `import` 语句。它 **不会** 改变文件读写、日志保存的默认路径。
+
+### 3.2 File Path (文件路径)
+*   **定义**：程序读取数据、保存日志、写入文件时使用的路径。
+*   **基准**：相对路径通常是相对于 **当前工作目录 (Current Working Directory, CWD)** 的。
+    *   如果你在项目根目录运行 `python tests/test_data.py`，那么 CWD 就是根目录。
+    *   如果你进入 `tests` 目录运行 `python test_data.py`，那么 CWD 就是 `tests` 目录。
+*   **结论**：即使 `pythonpath` 设置为 `src`，日志文件（如 `logs/app.log`）和数据文件（如 `data/test.json`）的保存位置，依然取决于你 **在哪里运行命令**，而不是 `src` 在哪里。
+
+**最佳实践**：
+为了避免路径混淆，建议在代码中使用 `pathlib` 获取绝对路径，而不是依赖相对路径。
+
+```python
+from pathlib import Path
+
+# 获取当前文件所在目录的绝对路径
+CURRENT_DIR = Path(__file__).parent.absolute()
+
+# 获取项目根目录 (假设当前文件在 tests/ 下)
+PROJECT_ROOT = CURRENT_DIR.parent
+
+# 这样无论你在哪里运行命令，都能准确找到文件
+data_path = PROJECT_ROOT / "data" / "test.json"
+```

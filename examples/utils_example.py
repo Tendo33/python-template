@@ -3,7 +3,7 @@
 演示如何使用 utils 包中的各种工具函数。
 """
 
-# 方式1: 从 utils 包直接导入常用函数
+import python_template.utils as utils
 from python_template.utils import (
     ContextTimer,
     get_logger,
@@ -11,11 +11,6 @@ from python_template.utils import (
     timing_decorator,
     write_json,
 )
-
-
-# 方式3: 从具体模块导入
-from python_template.utils.file_utils import calculate_file_hash, copy_file
-from python_template.utils.json_utils import merge_json_files
 
 
 def example_logger():

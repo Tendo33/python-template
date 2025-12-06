@@ -5,9 +5,6 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict
-
-import pytest
 
 from python_template.utils import (
     merge_json_files,
@@ -102,7 +99,7 @@ class TestSafeJsonLoads:
 
     def test_safe_json_loads_array(self) -> None:
         """Test parsing JSON array."""
-        json_str = '[1, 2, 3]'
+        json_str = "[1, 2, 3]"
         result = safe_json_loads(json_str)
         assert result == [1, 2, 3]
 

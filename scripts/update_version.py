@@ -10,7 +10,7 @@ This script updates the version number across all relevant files in the project:
 
 Usage:
     python scripts/update_version.py <new_version> [--dry-run]
-    
+
 Examples:
     python scripts/update_version.py 0.2.0
     python scripts/update_version.py 1.0.0 --dry-run
@@ -25,15 +25,15 @@ from typing import List, Tuple
 
 class VersionUpdater:
     """Version updater for the project.
-    
+
     项目版本更新器。
     """
 
     def __init__(self, project_root: Path):
         """Initialize version updater.
-        
+
         初始化版本更新器。
-        
+
         Args:
             project_root: Path to project root directory
         """
@@ -59,12 +59,12 @@ class VersionUpdater:
     @staticmethod
     def validate_version(version: str) -> bool:
         """Validate semantic version format.
-        
+
         验证语义化版本格式。
-        
+
         Args:
             version: Version string to validate
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -74,9 +74,9 @@ class VersionUpdater:
 
     def get_current_version(self) -> str:
         """Get current version from pyproject.toml.
-        
+
         从pyproject.toml获取当前版本。
-        
+
         Returns:
             Current version string
         """
@@ -95,15 +95,15 @@ class VersionUpdater:
         self, file_path: Path, pattern: str, replacement: str, new_version: str
     ) -> Tuple[bool, str]:
         """Update version in a single file.
-        
+
         更新单个文件中的版本。
-        
+
         Args:
             file_path: Path to file to update
             pattern: Regex pattern to find version
             replacement: Replacement template with {version} placeholder
             new_version: New version string
-            
+
         Returns:
             Tuple of (success, message)
         """
@@ -135,13 +135,13 @@ class VersionUpdater:
 
     def update_all(self, new_version: str, dry_run: bool = False) -> List[str]:
         """Update version in all project files.
-        
+
         更新所有项目文件中的版本。
-        
+
         Args:
             new_version: New version string
             dry_run: If True, only show what would be changed
-            
+
         Returns:
             List of status messages
         """
@@ -193,7 +193,7 @@ class VersionUpdater:
 
 def main():
     """Main entry point for the script.
-    
+
     脚本的主入口点。
     """
     parser = argparse.ArgumentParser(
