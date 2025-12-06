@@ -1,7 +1,6 @@
 # Python Template
 
-[![CI](https://github.com/yourusername/python-template/workflows/CI/badge.svg)](https://github.com/yourusername/python-template/actions)
-[![codecov](https://codecov.io/gh/yourusername/python-template/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/python-template)
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
