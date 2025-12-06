@@ -4,7 +4,7 @@
 """
 
 # 方式1: 从 utils 包直接导入常用函数
-from utils import (
+from python_template.utils import (
     ContextTimer,
     get_logger,
     read_json,
@@ -12,12 +12,10 @@ from utils import (
     write_json,
 )
 
-# 方式2: 导入整个 utils 包
-import utils
 
 # 方式3: 从具体模块导入
-from utils.file_utils import calculate_file_hash, copy_file
-from utils.json_utils import merge_json_files
+from python_template.utils.file_utils import calculate_file_hash, copy_file
+from python_template.utils.json_utils import merge_json_files
 
 
 def example_logger():
