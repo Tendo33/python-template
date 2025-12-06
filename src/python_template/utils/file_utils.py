@@ -111,7 +111,7 @@ def calculate_file_hash(
         logger.debug(f"File hash ({algorithm}): {hash_value}")
         return hash_value
 
-    except ValueError as e:
+    except ValueError:
         logger.error(f"Unsupported hash algorithm: {algorithm}")
         logger.debug(f"Traceback:\n{traceback.format_exc()}")
         return None
@@ -284,7 +284,7 @@ def read_text_file(
             logger.warning(f"File not found: {file_path}")
             return default
 
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             content = f.read()
             logger.debug(f"Read {len(content)} characters from: {file_path}")
             return content

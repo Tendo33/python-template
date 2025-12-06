@@ -38,7 +38,7 @@ def parse_timestamp(timestamp_str: str) -> Optional[datetime]:
     """
     try:
         return datetime.fromisoformat(timestamp_str)
-    except ValueError as e:
+    except ValueError:
         logger.error(f"Invalid timestamp format: {timestamp_str}")
         logger.debug(f"Traceback:\n{traceback.format_exc()}")
         return None
