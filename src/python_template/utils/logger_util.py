@@ -5,6 +5,7 @@ a modern and powerful logging library for Python.
 """
 
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -41,6 +42,18 @@ def setup_logging(
     """
     # 移除默认的处理器
     logger.remove()
+
+    # 如果未指定日志文件，则使用默认路径
+    if log_file is None:
+        # 获取项目根目录 (假设当前文件在 src/python_template/utils/logger_util.py)
+        # 向上回溯4级: utils -> python_template -> src -> python-template (root)
+        project_root = Path(__file__).resolve().parents[3]
+        log_dir = project_root / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # 生成带日期的日志文件名
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        log_file = str(log_dir / f"{current_date}.log")
 
     # 默认格式字符串
     if format_string is None:
@@ -186,6 +199,9 @@ def log_function_calls(func):
 
     return wrapper
 
+
+# 配置默认日志（包含文件输出）
+setup_logging()
 
 # 预配置的日志器实例
 default_logger = get_logger("python_template")
