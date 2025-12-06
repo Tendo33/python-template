@@ -22,8 +22,8 @@ pip install uv
 ### 2. 安装依赖
 
 ```bash
-# 同步项目依赖
-uv sync
+# 同步项目依赖（包含开发工具）
+uv sync --all-extras
 ```
 
 ### 3. 项目重命名 (可选)
@@ -224,7 +224,7 @@ git clone https://github.com/yourusername/python-template.git
 cd python-template
 
 # 安装开发依赖
-uv sync --dev
+uv sync --all-extras
 ```
 
 ### 代码质量
