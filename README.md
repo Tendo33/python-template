@@ -1,19 +1,66 @@
 # Python Template
 
-
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
 一个现代化的 Python 工具库模板，集成了常用的工具函数和最佳实践。
 
+## 🚀 开发者快速上手
+
+如果你是刚克隆此项目的开发人员，请按照以下顺序初始化项目：
+
+### 1. 环境准备
+
+本项目使用 [uv](https://github.com/astral-sh/uv) 进行包管理。
+
+```bash
+# 安装 uv (如果尚未安装)
+pip install uv
+```
+
+### 2. 安装依赖
+
+```bash
+# 同步项目依赖
+uv sync
+```
+
+### 3. 项目重命名 (可选)
+
+如果你将此模板用于新项目，请先重命名包名：
+
+```bash
+# 将 'python_template' 重命名为你的项目名
+python scripts/rename_package.py my_awesome_project
+```
+
+### 4. 配置代码检查
+
+安装 git hooks 以确保代码质量：
+
+```bash
+# 配置 pre-commit hooks
+python scripts/setup_pre_commit.py
+```
+
+### 5. 验证环境
+
+运行测试确保一切正常：
+
+```bash
+uv run pytest
+```
+
+---
+
 ## ✨ 特性
 
-- 🛠 **丰富的工具集**：包含日期、文件、JSON、装饰器等常用工具模块
+- 🛠 **丰富的工具集**：包含日期、文件、JSON、装饰器、通用工具等常用模块
 - 📝 **强大的日志系统**：基于 [loguru](https://github.com/Delgan/loguru) 的预配置日志管理
 - ⚙️ **配置管理**：基于 [pydantic-settings](https://github.com/pydantic/pydantic-settings) 的类型安全配置
 - 🔄 **上下文管理**：线程安全的运行时上下文存储
-- 🚀 **现代化工具链**：使用 `uv` 进行包管理，`ruff` 进行代码检查
+- 🚀 **现代化工具链**：使用 `uv` 进行包管理，`ruff` 进行代码检查和格式化
 
 ## 📦 安装
 
@@ -44,7 +91,19 @@ logger.error("这是一条错误日志")
 logger.debug("这是一条调试日志")
 ```
 
-### 2. 装饰器工具 (Decorators)
+### 2. 配置管理 (Settings)
+
+```python
+from python_template.utils import get_settings
+
+settings = get_settings()
+
+print(f"App Name: {settings.app.name}")
+print(f"Debug Mode: {settings.app.debug}")
+print(f"Log Level: {settings.logging.level}")
+```
+
+### 3. 装饰器工具 (Decorators)
 
 ```python
 from python_template.utils import timing_decorator, retry_decorator, log_calls
@@ -67,7 +126,26 @@ def calculate(a, b):
     return a + b
 ```
 
-### 3. 文件操作 (File Utils)
+### 4. 通用工具 (Common Utils)
+
+```python
+from python_template.utils import chunk_list, flatten_dict, merge_dicts
+
+# 列表分块
+items = [1, 2, 3, 4, 5]
+chunks = chunk_list(items, 2)  # [[1, 2], [3, 4], [5]]
+
+# 字典展平
+nested = {"a": {"b": 1}}
+flat = flatten_dict(nested)  # {"a.b": 1}
+
+# 字典合并
+d1 = {"a": 1}
+d2 = {"b": 2}
+merged = merge_dicts(d1, d2)  # {"a": 1, "b": 2}
+```
+
+### 5. 文件操作 (File Utils)
 
 ```python
 from python_template.utils import read_text_file, write_text_file, ensure_directory
@@ -82,7 +160,7 @@ write_text_file("Hello World", "data/output/test.txt")
 content = read_text_file("data/output/test.txt", default="Default Content")
 ```
 
-### 4. JSON 处理 (JSON Utils)
+### 6. JSON 处理 (JSON Utils)
 
 ```python
 from python_template.utils import read_json, write_json
@@ -96,9 +174,10 @@ write_json(data, "config.json", indent=2)
 config = read_json("config.json", default={})
 ```
 
-### 5. 日期时间 (Date Utils)
+### 7. 日期时间 (Date Utils)
 
 ```python
+from datetime import datetime
 from python_template.utils import get_timestamp, format_datetime, get_current_time
 
 # 获取当前 ISO 时间戳
@@ -125,9 +204,12 @@ python-template/
 │   │   ├── logger_util.py     # 日志配置
 │   │   ├── setting.py         # 应用配置管理
 │   │   └── context.py         # 上下文管理
-│   └── models/             # 数据模型 (预留)
+│   └── models/             # 数据模型
 ├── tests/                  # 测试用例
-├── scripts/                # 开发脚本 (lint, format)
+├── scripts/                # 维护脚本
+│   ├── rename_package.py      # 重命名包脚本
+│   ├── setup_pre_commit.py    # git hooks 配置脚本
+│   └── update_version.py      # 版本更新脚本
 ├── pyproject.toml          # 项目配置
 └── README.md               # 说明文档
 ```
@@ -147,12 +229,14 @@ uv sync --dev
 
 ### 代码质量
 
+本项目使用 `ruff` 进行代码格式化和检查。
+
 ```bash
 # 格式化代码
-python scripts/format.py
+uv run ruff format
 
 # 代码检查
-python scripts/lint.py
+uv run ruff check
 ```
 
 ### 运行测试
@@ -160,6 +244,45 @@ python scripts/lint.py
 ```bash
 # 运行所有测试
 uv run pytest
+```
+
+## 🛠️ 维护脚本
+
+项目在 `scripts/` 目录下提供了一些实用的维护脚本：
+
+### 1. Git Hooks 配置 (`setup_pre_commit.py`)
+
+用于自动配置 git hooks，确保每次提交时自动运行代码检查和格式化。
+
+```bash
+# 安装并配置 hooks
+python scripts/setup_pre_commit.py
+
+# 选项：
+# --update  更新 hooks 到最新版本
+# --test    手动运行 hooks 检查所有文件
+# --all     执行安装、更新和测试
+```
+
+### 2. 项目重命名 (`rename_package.py`)
+
+如果你想将模板用于新项目，可以使用此脚本一键重命名包名和相关配置。
+
+```bash
+# 预览修改 (不实际执行)
+python scripts/rename_package.py my_new_project --dry-run
+
+# 执行重命名
+python scripts/rename_package.py my_new_project
+```
+
+### 3. 版本更新 (`update_version.py`)
+
+统一更新项目中的版本号（包括 pyproject.toml, \_\_init\_\_.py 等）。
+
+```bash
+# 更新版本到 0.2.0
+python scripts/update_version.py 0.2.0
 ```
 
 ## 📄 许可证
