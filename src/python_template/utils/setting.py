@@ -1,215 +1,154 @@
 """Settings module using Pydantic for configuration management.
 
-This module provides a comprehensive settings system that:
-- Loads configuration from environment variables
-- Supports .env file loading
-- Provides type-safe configuration with validation
-- Organizes settings into logical groups
-- Implements singleton pattern for global access
+This is a lightweight template for managing application settings.
+这是一个轻量级的应用配置管理模板。
 
-使用Pydantic实现的配置管理模块，支持从环境变量和.env文件加载配置。
+Features / 特性:
+- Load from environment variables and .env file / 从环境变量和.env文件加载
+- Type-safe with Pydantic validation / 使用Pydantic进行类型安全验证
+- Singleton pattern / 单例模式
+- Easy to extend / 易于扩展
+
+Usage / 使用方法:
+    from python_template.utils.setting import get_settings
+
+    settings = get_settings()
+    print(settings.app_name)
+    print(settings.debug)
+
+How to add your own settings / 如何添加自己的配置项:
+    1. Add field to Settings class / 在Settings类中添加字段
+    2. Add corresponding env var to .env.example / 在.env.example中添加对应的环境变量
+    3. Use Field() for validation and defaults / 使用Field()进行验证和设置默认值
+
+    Example / 示例:
+        database_url: str = Field(
+            default="sqlite:///./app.db",
+            description="Database connection URL"
+        )
 """
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class AppSettings(BaseSettings):
-    """Application settings / 应用程序配置."""
+class Settings(BaseSettings):
+    """Application settings / 应用配置.
 
-    name: str = Field(default="python-template", description="Application name")
-    version: str = Field(default="0.1.0", description="Application version")
-    debug: bool = Field(default=False, description="Debug mode")
+    Add your own configuration fields here following the examples below.
+    参考下面的示例添加你自己的配置字段。
+
+    Configuration priority (highest to lowest) / 配置优先级（从高到低）:
+    1. Environment variables / 环境变量
+    2. .env file / .env文件
+    3. Default values / 默认值
+    """
+
+    # Basic application settings / 基础应用配置
+    app_name: str = Field(
+        default="python-template", description="Application name / 应用名称"
+    )
+    app_version: str = Field(
+        default="0.1.0", description="Application version / 应用版本"
+    )
+    debug: bool = Field(default=False, description="Debug mode / 调试模式")
     environment: str = Field(
         default="development",
-        description="Environment (development/staging/production)",
+        description="Environment: development/staging/production / 运行环境",
+    )
+
+    # Logging settings / 日志配置
+    log_level: str = Field(default="INFO", description="Log level / 日志级别")
+    log_file: str = Field(
+        default="logs/app.log", description="Log file path / 日志文件路径"
+    )
+
+    # Example: Add your own settings here / 示例：在这里添加你自己的配置
+    # database_url: str = Field(default="sqlite:///./app.db")
+    # api_key: str = Field(default="")
+    # max_connections: int = Field(default=10, ge=1, le=100)
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="_",
+        case_sensitive=False,
+        extra="ignore",  # Allow extra fields for flexibility / 允许额外字段以提高灵活性
     )
 
     @field_validator("environment")
     @classmethod
     def validate_environment(cls, v: str) -> str:
-        """Validate environment value / 验证环境变量值."""
+        """Validate environment value / 验证环境值."""
         allowed = ["development", "staging", "production"]
         if v not in allowed:
             raise ValueError(f"Environment must be one of {allowed}")
         return v
 
-
-class LoggingSettings(BaseSettings):
-    """Logging settings / 日志配置."""
-
-    level: str = Field(default="INFO", description="Logging level")
-    format: str = Field(default="standard", description="Log format (standard/json)")
-    file: str = Field(default="", description="Log file path (empty for stdout only)")
-    rotation: str = Field(default="10 MB", description="Log rotation size")
-    retention: str = Field(default="1 week", description="Log retention period")
-    json_format: bool = Field(default=False, description="Use JSON format for logs")
-
-    @field_validator("level")
+    @field_validator("log_level")
     @classmethod
-    def validate_level(cls, v: str) -> str:
-        """Validate logging level / 验证日志级别."""
+    def validate_log_level(cls, v: str) -> str:
+        """Validate log level / 验证日志级别."""
         allowed = ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
         v_upper = v.upper()
         if v_upper not in allowed:
-            raise ValueError(f"Logging level must be one of {allowed}")
+            raise ValueError(f"Log level must be one of {allowed}")
         return v_upper
 
-    @field_validator("format")
-    @classmethod
-    def validate_format(cls, v: str) -> str:
-        """Validate log format / 验证日志格式."""
-        allowed = ["standard", "json"]
-        if v not in allowed:
-            raise ValueError(f"Log format must be one of {allowed}")
-        return v
-
-
-class PerformanceSettings(BaseSettings):
-    """Performance settings / 性能配置."""
-
-    timeout: int = Field(default=30, ge=1, description="Request timeout in seconds")
-    max_retries: int = Field(default=3, ge=0, description="Maximum retry attempts")
-    buffer_size: int = Field(default=1024, ge=64, description="Buffer size in bytes")
-    concurrent_workers: int = Field(
-        default=4, ge=1, description="Number of concurrent workers"
-    )
-
-
-class SecuritySettings(BaseSettings):
-    """Security settings / 安全配置."""
-
-    secret_key: str = Field(default="", description="Secret key for encryption")
-    api_key: str = Field(default="", description="API key for external services")
-    ssl_verify: bool = Field(default=True, description="Verify SSL certificates")
-    allowed_hosts: List[str] = Field(
-        default_factory=lambda: ["localhost", "127.0.0.1"],
-        description="Allowed hosts",
-    )
-
-    @field_validator("secret_key")
-    @classmethod
-    def validate_secret_key(cls, v: str) -> str:
-        """Validate secret key in production / 在生产环境验证密钥."""
-        # Note: This validation would typically check environment
-        # For now, we just warn if empty
-        if not v:
-            import warnings
-
-            warnings.warn(
-                "SECRET_KEY is not set. This is insecure in production!",
-                UserWarning,
-                stacklevel=2,
-            )
-        return v
-
-
-class Settings(BaseSettings):
-    """Main settings class combining all configuration groups.
-
-    主配置类，整合所有配置组。
-
-    Configuration priority (highest to lowest):
-    1. Environment variables
-    2. .env file
-    3. Default values
-
-    配置优先级（从高到低）：
-    1. 环境变量
-    2. .env 文件
-    3. 默认值
-    """
-
-    # Nested settings / 嵌套配置
-    app: AppSettings = Field(default_factory=AppSettings)
-    logging: LoggingSettings = Field(default_factory=LoggingSettings)
-    performance: PerformanceSettings = Field(default_factory=PerformanceSettings)
-    security: SecuritySettings = Field(default_factory=SecuritySettings)
-
-    model_config = SettingsConfigDict(
-        # Look for .env file in project root
-        env_file=".env",
-        env_file_encoding="utf-8",
-        # Allow nested env vars like APP__NAME=myapp
-        env_nested_delimiter="__",
-        # Case sensitive environment variables
-        case_sensitive=False,
-        # Extra fields are forbidden
-        extra="forbid",
-    )
-
-    @classmethod
-    def from_env_file(cls, env_file: Optional[Path] = None) -> "Settings":
-        """Load settings from a specific .env file.
-
-        从指定的.env文件加载配置。
-
-        Args:
-            env_file: Path to .env file. If None, uses default .env
-
-        Returns:
-            Settings instance
-        """
-        if env_file:
-            return cls(_env_file=str(env_file))
-        return cls()
+    # Add your own validators here / 在这里添加你自己的验证器
+    # Example:
+    # @field_validator("api_key")
+    # @classmethod
+    # def validate_api_key(cls, v: str) -> str:
+    #     if not v and cls.environment == "production":
+    #         raise ValueError("API key is required in production")
+    #     return v
 
     def get_project_root(self) -> Path:
-        """Get project root directory.
-
-        获取项目根目录。
+        """Get project root directory / 获取项目根目录.
 
         Returns:
-            Path to project root
+            Path to project root / 项目根目录路径
         """
-        # Assuming this file is in src/utils/
+        # Assuming this file is in src/{package}/utils/
         current_file = Path(__file__).resolve()
-        # Go up: setting.py -> utils -> src -> project_root
-        return current_file.parent.parent.parent
+        # Go up: setting.py -> utils -> package -> src -> project_root
+        return current_file.parent.parent.parent.parent
 
-    def get_log_file_path(self) -> Optional[Path]:
-        """Get absolute path to log file if configured.
-
-        获取日志文件的绝对路径（如果已配置）。
+    def get_log_file_path(self) -> Path:
+        """Get absolute path to log file / 获取日志文件的绝对路径.
 
         Returns:
-            Path to log file or None
+            Absolute path to log file / 日志文件的绝对路径
         """
-        if not self.logging.file:
-            return None
-
-        log_path = Path(self.logging.file)
+        log_path = Path(self.log_file)
         if log_path.is_absolute():
             return log_path
-
-        # Relative path - make it relative to project root
         return self.get_project_root() / log_path
 
 
-# Singleton instance / 单例实例
+# Singleton pattern / 单例模式
 _settings: Optional[Settings] = None
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get global settings instance (singleton).
-
-    获取全局配置实例（单例模式）。
+    """Get global settings instance (singleton) / 获取全局配置实例（单例）.
 
     This function is cached to ensure only one Settings instance exists.
     该函数使用缓存确保只存在一个Settings实例。
 
     Returns:
-        Settings instance
+        Settings instance / 配置实例
 
     Example:
-        >>> from utils.setting import get_settings
+        >>> from python_template.utils.setting import get_settings
         >>> settings = get_settings()
-        >>> print(settings.app.name)
+        >>> print(settings.app_name)
         python-template
     """
     global _settings
@@ -219,44 +158,18 @@ def get_settings() -> Settings:
 
 
 def reload_settings(env_file: Optional[Path] = None) -> Settings:
-    """Reload settings from environment/file.
+    """Reload settings from environment/file / 重新加载配置.
 
-    重新加载配置。
-
-    This clears the cache and creates a new Settings instance.
-    This is useful for testing or when configuration changes at runtime.
-
-    这会清除缓存并创建新的Settings实例。
+    Useful for testing or when configuration changes at runtime.
     在测试或运行时配置更改时很有用。
 
     Args:
-        env_file: Optional path to .env file
+        env_file: Optional path to .env file / 可选的.env文件路径
 
     Returns:
-        New Settings instance
+        New Settings instance / 新的配置实例
     """
     global _settings
     get_settings.cache_clear()
-    _settings = Settings.from_env_file(env_file) if env_file else Settings()
+    _settings = Settings(_env_file=str(env_file)) if env_file else Settings()
     return _settings
-
-
-# Convenience function for direct access / 便捷访问函数
-def get_app_settings() -> AppSettings:
-    """Get application settings / 获取应用配置."""
-    return get_settings().app
-
-
-def get_logging_settings() -> LoggingSettings:
-    """Get logging settings / 获取日志配置."""
-    return get_settings().logging
-
-
-def get_performance_settings() -> PerformanceSettings:
-    """Get performance settings / 获取性能配置."""
-    return get_settings().performance
-
-
-def get_security_settings() -> SecuritySettings:
-    """Get security settings / 获取安全配置."""
-    return get_settings().security

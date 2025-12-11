@@ -93,15 +93,54 @@ logger.debug("这是一条调试日志")
 
 ### 2. 配置管理 (Settings)
 
-```python
-from python_template.utils import get_settings
+基于 Pydantic 的类型安全配置管理，支持环境变量和 .env 文件。
 
+```python
+from python_template.utils.setting import get_settings
+
+# 获取配置（单例）
 settings = get_settings()
 
-print(f"App Name: {settings.app.name}")
-print(f"Debug Mode: {settings.app.debug}")
-print(f"Log Level: {settings.logging.level}")
+# 访问配置项
+print(f"App Name: {settings.app_name}")
+print(f"Debug Mode: {settings.debug}")
+print(f"Environment: {settings.environment}")
+print(f"Log Level: {settings.log_level}")
+
+# 获取项目路径
+project_root = settings.get_project_root()
+log_path = settings.get_log_file_path()
 ```
+
+**配置文件设置：**
+
+```bash
+# 复制示例文件
+cp .env.example .env
+
+# 编辑 .env 文件设置你的配置
+APP_NAME=my-app
+DEBUG=true
+ENVIRONMENT=development
+LOG_LEVEL=DEBUG
+```
+
+**添加自定义配置：**
+
+在 `src/python_template/utils/setting.py` 中添加字段：
+
+```python
+class Settings(BaseSettings):
+    # ... 现有字段 ...
+
+    # 添加你的配置
+    database_url: str = Field(
+        default="sqlite:///./app.db",
+        description="Database URL"
+    )
+```
+
+详细说明请查看 [配置指南](doc/SETTINGS_GUIDE.md)
 
 ### 3. 装饰器工具 (Decorators)
 
