@@ -11,6 +11,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Union
 
+import aiofiles
+
 from .logger_util import get_logger
 
 logger = get_logger(__name__)
@@ -360,3 +362,72 @@ def sanitize_filename(filename: str, replacement: str = "_") -> str:
         sanitized = name[:max_name_len] + ext
 
     return sanitized.strip()
+
+
+# Async functions for I/O-bound operations
+
+
+async def async_read_text_file(
+    file_path: Union[str, Path],
+    encoding: str = "utf-8",
+    default: str = "",
+) -> str:
+    """异步读取文本文件。
+
+    Args:
+        file_path: 文件路径
+        encoding: 文件编码
+        default: 读取失败时返回的默认值
+
+    Returns:
+        文件内容,失败时返回 default
+    """
+    try:
+        file_path = Path(file_path)
+        if not file_path.exists():
+            logger.warning(f"File not found: {file_path}")
+            return default
+
+        async with aiofiles.open(file_path, encoding=encoding) as f:
+            content = await f.read()
+            logger.debug(f"Read {len(content)} characters from: {file_path}")
+            return content
+
+    except Exception as e:
+        logger.error(f"Failed to read file {file_path}: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return default
+
+
+async def async_write_text_file(
+    content: str,
+    file_path: Union[str, Path],
+    encoding: str = "utf-8",
+    create_dirs: bool = True,
+) -> bool:
+    """异步写入文本文件。
+
+    Args:
+        content: 要写入的内容
+        file_path: 文件路径
+        encoding: 文件编码
+        create_dirs: 是否自动创建父目录
+
+    Returns:
+        成功返回 True,失败返回 False
+    """
+    try:
+        file_path = Path(file_path)
+
+        if create_dirs:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        async with aiofiles.open(file_path, "w", encoding=encoding) as f:
+            await f.write(content)
+            logger.debug(f"Wrote {len(content)} characters to: {file_path}")
+            return True
+
+    except Exception as e:
+        logger.error(f"Failed to write file {file_path}: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return False

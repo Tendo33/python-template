@@ -8,6 +8,8 @@ import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+import aiofiles
+
 from .logger_util import get_logger
 
 logger = get_logger(__name__)
@@ -217,5 +219,88 @@ def validate_json_schema(data: Dict[str, Any], required_keys: List[str]) -> bool
 
     except Exception as e:
         logger.error(f"Failed to validate JSON schema: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return False
+
+
+# Async functions for I/O-bound operations
+
+
+async def async_read_json(
+    file_path: Union[str, Path],
+    encoding: str = "utf-8",
+    default: Any = None,
+) -> Any:
+    """异步读取 JSON 文件。
+
+    Args:
+        file_path: JSON 文件路径
+        encoding: 文件编码
+        default: 读取失败时返回的默认值
+
+    Returns:
+        解析后的 JSON 数据,失败时返回 default
+    """
+    try:
+        file_path = Path(file_path)
+        if not file_path.exists():
+            logger.warning(f"JSON file not found: {file_path}")
+            return default
+
+        async with aiofiles.open(file_path, encoding=encoding) as f:
+            content = await f.read()
+            data = json.loads(content)
+            logger.debug(f"Successfully read JSON from: {file_path}")
+            return data
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in {file_path}: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return default
+    except Exception as e:
+        logger.error(f"Failed to read JSON file {file_path}: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return default
+
+
+async def async_write_json(
+    data: Any,
+    file_path: Union[str, Path],
+    encoding: str = "utf-8",
+    indent: int = 2,
+    ensure_ascii: bool = False,
+    create_dirs: bool = True,
+) -> bool:
+    """异步写入 JSON 文件。
+
+    Args:
+        data: 要写入的数据
+        file_path: JSON 文件路径
+        encoding: 文件编码
+        indent: 缩进空格数
+        ensure_ascii: 是否确保 ASCII 编码
+        create_dirs: 是否自动创建父目录
+
+    Returns:
+        写入成功返回 True,失败返回 False
+    """
+    try:
+        file_path = Path(file_path)
+
+        if create_dirs:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        content = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
+        async with aiofiles.open(file_path, "w", encoding=encoding) as f:
+            await f.write(content)
+            logger.debug(f"Successfully wrote JSON to: {file_path}")
+            return True
+
+    except TypeError as e:
+        logger.error(f"Data is not JSON serializable: {e}")
+        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to write JSON file {file_path}: {e}")
         logger.debug(f"Traceback:\n{traceback.format_exc()}")
         return False
