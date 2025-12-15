@@ -229,6 +229,43 @@ now = get_current_time()
 formatted = format_datetime(datetime.now(), format_str="%Y-%m-%d")
 ```
 
+### 8. 数据模型 (Pydantic Models)
+
+所有数据模型使用 Pydantic BaseModel 进行定义,提供类型验证和序列化功能。
+
+```python
+from python_template.models import BaseModel, User, ApiResponse
+from pydantic import Field
+
+# 使用预定义模型
+user = User(
+    id=1,
+    username="john_doe",
+    email="john@example.com",
+    full_name="John Doe"
+)
+
+# 序列化
+user_dict = user.model_dump()
+user_json = user.model_dump_json()
+
+# 创建自定义模型
+class Product(BaseModel):
+    """产品模型"""
+    id: int = Field(..., description="产品ID", ge=1)
+    name: str = Field(..., description="产品名称", min_length=1)
+    price: float = Field(..., description="价格", gt=0)
+
+# 使用泛型响应模型
+response = ApiResponse[Product](
+    success=True,
+    data=Product(id=1, name="Phone", price=999.99),
+    message="Product fetched successfully"
+)
+```
+
+详细使用说明请查看 [模型使用指南](doc/MODELS_GUIDE.md)
+
 ## 📁 项目结构
 
 ```
@@ -327,6 +364,7 @@ python scripts/update_version.py 0.2.0
 ## 📚 文档
 
 - [配置指南](doc/SETTINGS_GUIDE.md) - Pydantic Settings 详细说明
+- [模型使用指南](doc/MODELS_GUIDE.md) - Pydantic BaseModel 数据模型使用说明
 - [SDK 使用指南](doc/SDK_USAGE.md) - 工具函数使用示例  
 - [Pre-commit 指南](doc/PRE_COMMIT_GUIDE.md) - Git hooks 配置
 - [Cursor Rules 指南](doc/CURSOR_RULES_GUIDE.md) - AI 编码规则使用说明
