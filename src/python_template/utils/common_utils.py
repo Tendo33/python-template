@@ -3,7 +3,6 @@
 提供各种通用的工具函数。
 """
 
-import re
 import traceback
 import uuid
 from typing import Any, Dict, List, Optional
@@ -133,19 +132,6 @@ def filter_dict(
     return data.copy()
 
 
-def validate_email(email: str) -> bool:
-    """基本的邮箱地址验证。
-
-    Args:
-        email: 邮箱地址
-
-    Returns:
-        有效返回 True,否则返回 False
-    """
-    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    return bool(re.match(pattern, email))
-
-
 def generate_uuid() -> str:
     """生成 UUID4 字符串。
 
@@ -153,20 +139,6 @@ def generate_uuid() -> str:
         UUID4 字符串
     """
     return str(uuid.uuid4())
-
-
-def deep_copy_dict(source: Dict[str, Any]) -> Dict[str, Any]:
-    """深拷贝字典。
-
-    Args:
-        source: 源字典
-
-    Returns:
-        深拷贝后的字典
-    """
-    import copy
-
-    return copy.deepcopy(source)
 
 
 def deep_merge_dict(base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:

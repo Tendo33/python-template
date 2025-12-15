@@ -16,7 +16,6 @@
 from .common_utils import (
     batch_process,
     chunk_list,
-    deep_copy_dict,
     deep_merge_dict,
     filter_dict,
     flatten_dict,
@@ -28,7 +27,6 @@ from .common_utils import (
     safe_get,
     safe_set,
     unflatten_dict,
-    validate_email,
 )
 
 # Context management
@@ -45,18 +43,13 @@ from .context import (
 
 # Date utilities
 from .date_utils import (
-    add_days,
-    add_hours,
-    add_minutes,
     format_datetime,
     from_unix_timestamp,
     get_current_date,
     get_current_time,
-    get_month_start,
     get_time_difference,
     get_timestamp,
     get_unix_timestamp,
-    get_week_start,
     humanize_timedelta,
     is_weekend,
     parse_datetime,
@@ -114,10 +107,6 @@ from .logger_util import (
 
 # Settings and configuration
 from .setting import (
-    get_app_settings,
-    get_logging_settings,
-    get_performance_settings,
-    get_security_settings,
     get_settings,
     reload_settings,
 )
@@ -170,13 +159,8 @@ __all__ = [
     "parse_datetime",
     "get_current_date",
     "get_current_time",
-    "add_days",
-    "add_hours",
-    "add_minutes",
     "get_time_difference",
     "is_weekend",
-    "get_week_start",
-    "get_month_start",
     "humanize_timedelta",
     "get_unix_timestamp",
     "from_unix_timestamp",
@@ -186,9 +170,7 @@ __all__ = [
     "unflatten_dict",
     "merge_dicts",
     "filter_dict",
-    "validate_email",
     "generate_uuid",
-    "deep_copy_dict",
     "deep_merge_dict",
     "safe_get",
     "safe_set",
@@ -196,10 +178,6 @@ __all__ = [
     "remove_empty_values",
     "batch_process",
     "retry_on_exception",
-    "get_app_settings",
-    "get_logging_settings",
-    "get_performance_settings",
-    "get_security_settings",
     "get_settings",
     "reload_settings",
     "Context",

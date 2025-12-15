@@ -4,14 +4,20 @@
 """
 
 import hashlib
+import re
 import shutil
 import traceback
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Union
 
 from .logger_util import get_logger
 
 logger = get_logger(__name__)
+
+# Pre-compiled regex patterns for filename sanitization
+FILENAME_ILLEGAL_PATTERN = re.compile(r'[<>:"/\\|?*]')
+FILENAME_CONTROL_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 
 def ensure_directory(directory_path: Union[str, Path]) -> Optional[Path]:
@@ -58,6 +64,7 @@ def get_file_size(file_path: Union[str, Path]) -> Optional[int]:
         return None
 
 
+@lru_cache(maxsize=128)
 def format_file_size(size_bytes: int) -> str:
     """格式化文件大小为人类可读格式。
 
@@ -329,6 +336,7 @@ def write_text_file(
         return False
 
 
+@lru_cache(maxsize=128)
 def sanitize_filename(filename: str, replacement: str = "_") -> str:
     """清理文件名,移除或替换非法字符。
 
@@ -339,13 +347,11 @@ def sanitize_filename(filename: str, replacement: str = "_") -> str:
     Returns:
         清理后的文件名
     """
-    import re
-
     # 移除或替换非法字符
-    sanitized = re.sub(r'[<>:"/\\|?*]', replacement, filename)
+    sanitized = FILENAME_ILLEGAL_PATTERN.sub(replacement, filename)
 
     # 移除控制字符
-    sanitized = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", sanitized)
+    sanitized = FILENAME_CONTROL_PATTERN.sub("", sanitized)
 
     # 限制长度
     if len(sanitized) > 255:

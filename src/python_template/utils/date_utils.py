@@ -110,45 +110,6 @@ def get_current_time(format_str: str = "%H:%M:%S") -> str:
     return datetime.now().strftime(format_str)
 
 
-def add_days(dt: datetime, days: int) -> datetime:
-    """给 datetime 对象添加天数。
-
-    Args:
-        dt: datetime 对象
-        days: 要添加的天数(可以为负数)
-
-    Returns:
-        新的 datetime 对象
-    """
-    return dt + timedelta(days=days)
-
-
-def add_hours(dt: datetime, hours: int) -> datetime:
-    """给 datetime 对象添加小时数。
-
-    Args:
-        dt: datetime 对象
-        hours: 要添加的小时数(可以为负数)
-
-    Returns:
-        新的 datetime 对象
-    """
-    return dt + timedelta(hours=hours)
-
-
-def add_minutes(dt: datetime, minutes: int) -> datetime:
-    """给 datetime 对象添加分钟数。
-
-    Args:
-        dt: datetime 对象
-        minutes: 要添加的分钟数(可以为负数)
-
-    Returns:
-        新的 datetime 对象
-    """
-    return dt + timedelta(minutes=minutes)
-
-
 def get_time_difference(
     dt1: datetime,
     dt2: datetime,
@@ -191,38 +152,6 @@ def is_weekend(dt: Optional[datetime] = None) -> bool:
     if dt is None:
         dt = datetime.now()
     return dt.weekday() >= 5  # 5=Saturday, 6=Sunday
-
-
-def get_week_start(dt: Optional[datetime] = None) -> datetime:
-    """获取本周的开始时间(周一 00:00:00)。
-
-    Args:
-        dt: datetime 对象,默认为当前时间
-
-    Returns:
-        本周开始的 datetime 对象
-    """
-    if dt is None:
-        dt = datetime.now()
-
-    days_since_monday = dt.weekday()
-    week_start = dt - timedelta(days=days_since_monday)
-    return week_start.replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-def get_month_start(dt: Optional[datetime] = None) -> datetime:
-    """获取本月的开始时间(1号 00:00:00)。
-
-    Args:
-        dt: datetime 对象,默认为当前时间
-
-    Returns:
-        本月开始的 datetime 对象
-    """
-    if dt is None:
-        dt = datetime.now()
-
-    return dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
 
 def humanize_timedelta(

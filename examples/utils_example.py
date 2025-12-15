@@ -22,11 +22,6 @@ def example_logger():
     logger.warning("这是一条警告信息")
     logger.error("这是一条错误信息")
 
-    try:
-        1 / 0
-    except Exception as e:
-        logger.exception(f"捕获到异常: {e}")
-
 
 @timing_decorator
 def example_timing_decorator():
@@ -87,7 +82,7 @@ def example_file_operations():
 
 def example_date_operations():
     """日期时间操作示例。"""
-    from datetime import datetime
+    from datetime import datetime, timedelta
 
     # 获取当前时间戳
     timestamp = utils.get_timestamp()
@@ -101,7 +96,7 @@ def example_date_operations():
 
     # 时间计算
     now = datetime.now()
-    tomorrow = utils.add_days(now, 1)
+    tomorrow = now + timedelta(days=1)
     print(f"明天: {utils.format_datetime(tomorrow)}")
 
     # 人性化时间差
@@ -152,11 +147,6 @@ def example_utility_functions():
     uuid_str = utils.generate_uuid()
     print(f"UUID: {uuid_str}")
 
-    # 验证邮箱
-    email = "test@example.com"
-    is_valid = utils.validate_email(email)
-    print(f"邮箱 {email} 是否有效: {is_valid}")
-
     # 清理文件名
     filename = 'invalid<>:"/\\|?*name.txt'
     sanitized = utils.sanitize_filename(filename)
@@ -204,7 +194,7 @@ def main():
 
 if __name__ == "__main__":
     # 设置日志
-    from utils import setup_logging
+    from python_template.utils import setup_logging
 
     setup_logging(level="INFO")
 
