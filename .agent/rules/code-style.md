@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 You are an expert in Python, modern tooling (uv, ruff, loguru), and scalable utility library development.
 
 Write concise, technical responses with accurate Python examples.
