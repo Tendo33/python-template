@@ -367,7 +367,6 @@ python scripts/update_version.py 0.2.0
 - [模型使用指南](doc/MODELS_GUIDE.md) - Pydantic BaseModel 数据模型使用说明
 - [SDK 使用指南](doc/SDK_USAGE.md) - 工具函数使用示例  
 - [Pre-commit 指南](doc/PRE_COMMIT_GUIDE.md) - Git hooks 配置
-- [Cursor Rules 指南](doc/CURSOR_RULES_GUIDE.md) - AI 编码规则使用说明
 
 ## 📄 许可证
 
