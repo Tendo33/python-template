@@ -7,15 +7,15 @@ a modern and powerful logging library for Python.
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from loguru import logger
 
 
 def setup_logging(
     level: str = "INFO",
-    format_string: Optional[str] = None,
-    log_file: Optional[str] = None,
+    format_string: str | None = None,
+    log_file: str | None = None,
     rotation: str = "10 MB",
     retention: str = "1 week",
     compression: str = "gz",
@@ -99,7 +99,7 @@ def setup_logging(
         )
 
 
-def get_logger(name: Optional[str] = None) -> Any:
+def get_logger(name: str | None = None) -> Any:
     """Get a logger instance.
 
     Args:
@@ -115,8 +115,8 @@ def get_logger(name: Optional[str] = None) -> Any:
 
 def configure_json_logging(
     level: str = "INFO",
-    log_file: Optional[str] = None,
-    extra_fields: Optional[Dict[str, Any]] = None,
+    log_file: str | None = None,
+    extra_fields: dict[str, Any] | None = None,
 ) -> None:
     """Configure JSON structured logging.
 
@@ -129,7 +129,7 @@ def configure_json_logging(
         extra_fields = {}
 
     # JSON格式化函数
-    def json_formatter(record: Dict[str, Any]) -> str:
+    def json_formatter(record: dict[str, Any]) -> str:
         """Format log record as JSON."""
         import json
 
@@ -200,39 +200,54 @@ def log_function_calls(func):
     return wrapper
 
 
-# 配置默认日志（包含文件输出）
-setup_logging()
+# 延迟初始化标志
+_logging_initialized = False
 
-# 预配置的日志器实例
-default_logger = get_logger("python_template")
+
+def _ensure_logging_initialized() -> None:
+    """确保日志系统已初始化（懒加载）。"""
+    global _logging_initialized
+    if not _logging_initialized:
+        setup_logging()
+        _logging_initialized = True
+
+
+def get_default_logger():
+    """获取默认日志器（懒加载初始化）。
+
+    Returns:
+        默认日志器实例
+    """
+    _ensure_logging_initialized()
+    return get_logger("python_template")
 
 
 # 便捷的日志函数
 def debug(message: str, **kwargs) -> None:
     """Log debug message."""
-    default_logger.debug(message, **kwargs)
+    get_default_logger().debug(message, **kwargs)
 
 
 def info(message: str, **kwargs) -> None:
     """Log info message."""
-    default_logger.info(message, **kwargs)
+    get_default_logger().info(message, **kwargs)
 
 
 def warning(message: str, **kwargs) -> None:
     """Log warning message."""
-    default_logger.warning(message, **kwargs)
+    get_default_logger().warning(message, **kwargs)
 
 
 def error(message: str, **kwargs) -> None:
     """Log error message."""
-    default_logger.error(message, **kwargs)
+    get_default_logger().error(message, **kwargs)
 
 
 def critical(message: str, **kwargs) -> None:
     """Log critical message."""
-    default_logger.critical(message, **kwargs)
+    get_default_logger().critical(message, **kwargs)
 
 
 def exception(message: str, **kwargs) -> None:
     """Log exception with traceback."""
-    default_logger.exception(message, **kwargs)
+    get_default_logger().exception(message, **kwargs)

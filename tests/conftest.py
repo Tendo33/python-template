@@ -5,9 +5,10 @@
 
 import json
 import tempfile
+from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Any
 
 import pytest
 
@@ -46,7 +47,7 @@ def temp_json_file(temp_dir: Path) -> Path:
 
 
 @pytest.fixture
-def sample_dict() -> Dict[str, Any]:
+def sample_dict() -> dict[str, Any]:
     """Sample dictionary for testing.
 
     用于测试的示例字典。
@@ -61,7 +62,7 @@ def sample_dict() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sample_nested_dict() -> Dict[str, Any]:
+def sample_nested_dict() -> dict[str, Any]:
     """Sample nested dictionary for flatten/unflatten tests.
 
     用于展平/还原测试的嵌套字典。

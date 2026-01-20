@@ -5,8 +5,9 @@
 
 import time
 import traceback
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Optional, Tuple
+from typing import Any
 
 from .logger_util import get_logger
 
@@ -47,7 +48,7 @@ def retry_decorator(
     max_retries: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: Tuple[Exception, ...] = (Exception,),
+    exceptions: tuple[Exception, ...] = (Exception,),
 ) -> Callable:
     """失败重试装饰器。
 
@@ -173,7 +174,7 @@ def log_calls(log_args: bool = True, log_result: bool = True) -> Callable:
     return decorator
 
 
-def deprecated(reason: str = "", alternative: Optional[str] = None) -> Callable:
+def deprecated(reason: str = "", alternative: str | None = None) -> Callable:
     """标记函数为已弃用的装饰器。
 
     Args:
@@ -267,7 +268,7 @@ class ContextTimer:
             )
 
     @property
-    def elapsed_time(self) -> Optional[float]:
+    def elapsed_time(self) -> float | None:
         """获取已经过的时间。
 
         Returns:

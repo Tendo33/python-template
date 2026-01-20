@@ -20,7 +20,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
 class VersionUpdater:
@@ -93,7 +92,7 @@ class VersionUpdater:
 
     def update_file(
         self, file_path: Path, pattern: str, replacement: str, new_version: str
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """Update version in a single file.
 
         更新单个文件中的版本。
@@ -133,7 +132,7 @@ class VersionUpdater:
         except Exception as e:
             return False, f"Error updating {file_path}: {e}"
 
-    def update_all(self, new_version: str, dry_run: bool = False) -> List[str]:
+    def update_all(self, new_version: str, dry_run: bool = False) -> list[str]:
         """Update version in all project files.
 
         更新所有项目文件中的版本。

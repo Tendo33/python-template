@@ -9,7 +9,6 @@ import shutil
 import traceback
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Union
 
 import aiofiles
 
@@ -22,7 +21,7 @@ FILENAME_ILLEGAL_PATTERN = re.compile(r'[<>:"/\\|?*]')
 FILENAME_CONTROL_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 
-def ensure_directory(directory_path: Union[str, Path]) -> Optional[Path]:
+def ensure_directory(directory_path: str | Path) -> Path | None:
     """确保目录存在,不存在则创建。
 
     Args:
@@ -42,7 +41,7 @@ def ensure_directory(directory_path: Union[str, Path]) -> Optional[Path]:
         return None
 
 
-def get_file_size(file_path: Union[str, Path]) -> Optional[int]:
+def get_file_size(file_path: str | Path) -> int | None:
     """获取文件大小(字节)。
 
     Args:
@@ -91,9 +90,9 @@ def format_file_size(size_bytes: int) -> str:
 
 
 def calculate_file_hash(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     algorithm: str = "sha256",
-) -> Optional[str]:
+) -> str | None:
     """计算文件哈希值。
 
     Args:
@@ -131,8 +130,8 @@ def calculate_file_hash(
 
 
 def copy_file(
-    src: Union[str, Path],
-    dst: Union[str, Path],
+    src: str | Path,
+    dst: str | Path,
     create_dirs: bool = True,
 ) -> bool:
     """复制文件。
@@ -167,8 +166,8 @@ def copy_file(
 
 
 def move_file(
-    src: Union[str, Path],
-    dst: Union[str, Path],
+    src: str | Path,
+    dst: str | Path,
     create_dirs: bool = True,
 ) -> bool:
     """移动文件。
@@ -202,7 +201,7 @@ def move_file(
         return False
 
 
-def delete_file(file_path: Union[str, Path], missing_ok: bool = True) -> bool:
+def delete_file(file_path: str | Path, missing_ok: bool = True) -> bool:
     """删除文件。
 
     Args:
@@ -234,10 +233,10 @@ def delete_file(file_path: Union[str, Path], missing_ok: bool = True) -> bool:
 
 
 def list_files(
-    directory: Union[str, Path],
+    directory: str | Path,
     pattern: str = "*",
     recursive: bool = False,
-) -> List[Path]:
+) -> list[Path]:
     """列出目录中的文件。
 
     Args:
@@ -273,7 +272,7 @@ def list_files(
 
 
 def read_text_file(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     default: str = "",
 ) -> str:
@@ -306,7 +305,7 @@ def read_text_file(
 
 def write_text_file(
     content: str,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     create_dirs: bool = True,
 ) -> bool:
@@ -368,7 +367,7 @@ def sanitize_filename(filename: str, replacement: str = "_") -> str:
 
 
 async def async_read_text_file(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     default: str = "",
 ) -> str:
@@ -401,7 +400,7 @@ async def async_read_text_file(
 
 async def async_write_text_file(
     content: str,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     create_dirs: bool = True,
 ) -> bool:

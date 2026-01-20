@@ -30,7 +30,6 @@ How to add your own settings / 如何添加自己的配置项:
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -131,10 +130,6 @@ class Settings(BaseSettings):
         return self.get_project_root() / log_path
 
 
-# Singleton pattern / 单例模式
-_settings: Optional[Settings] = None
-
-
 @lru_cache
 def get_settings() -> Settings:
     """Get global settings instance (singleton) / 获取全局配置实例（单例）.
@@ -151,13 +146,10 @@ def get_settings() -> Settings:
         >>> print(settings.app_name)
         python-template
     """
-    global _settings
-    if _settings is None:
-        _settings = Settings()
-    return _settings
+    return Settings()
 
 
-def reload_settings(env_file: Optional[Path] = None) -> Settings:
+def reload_settings(env_file: Path | None = None) -> Settings:
     """Reload settings from environment/file / 重新加载配置.
 
     Useful for testing or when configuration changes at runtime.
@@ -169,7 +161,5 @@ def reload_settings(env_file: Optional[Path] = None) -> Settings:
     Returns:
         New Settings instance / 新的配置实例
     """
-    global _settings
     get_settings.cache_clear()
-    _settings = Settings(_env_file=str(env_file)) if env_file else Settings()
-    return _settings
+    return get_settings() if env_file is None else Settings(_env_file=str(env_file))

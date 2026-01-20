@@ -5,7 +5,6 @@
 
 import traceback
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Union
 
 from .logger_util import get_logger
 
@@ -27,7 +26,7 @@ def get_timestamp(include_timezone: bool = True) -> str:
         return datetime.now().isoformat()
 
 
-def parse_timestamp(timestamp_str: str) -> Optional[datetime]:
+def parse_timestamp(timestamp_str: str) -> datetime | None:
     """解析 ISO 格式时间戳字符串。
 
     Args:
@@ -68,7 +67,7 @@ def format_datetime(
 def parse_datetime(
     date_str: str,
     format_str: str = "%Y-%m-%d %H:%M:%S",
-) -> Optional[datetime]:
+) -> datetime | None:
     """解析时间字符串为 datetime 对象。
 
     Args:
@@ -140,7 +139,7 @@ def get_time_difference(
         return diff
 
 
-def is_weekend(dt: Optional[datetime] = None) -> bool:
+def is_weekend(dt: datetime | None = None) -> bool:
     """判断是否为周末。
 
     Args:
@@ -155,7 +154,7 @@ def is_weekend(dt: Optional[datetime] = None) -> bool:
 
 
 def humanize_timedelta(
-    td: Union[timedelta, float],
+    td: timedelta | float,
     precision: int = 2,
 ) -> str:
     """将 timedelta 或秒数转换为人类可读格式。
@@ -167,7 +166,7 @@ def humanize_timedelta(
     Returns:
         人类可读的时间字符串
     """
-    if isinstance(td, (int, float)):
+    if isinstance(td, int | float):
         td = timedelta(seconds=td)
 
     total_seconds = int(td.total_seconds())
@@ -196,7 +195,7 @@ def humanize_timedelta(
     return ", ".join(parts)
 
 
-def get_unix_timestamp(dt: Optional[datetime] = None) -> int:
+def get_unix_timestamp(dt: datetime | None = None) -> int:
     """获取 Unix 时间戳(秒)。
 
     Args:
@@ -221,3 +220,73 @@ def from_unix_timestamp(timestamp: int) -> datetime:
         datetime 对象
     """
     return datetime.fromtimestamp(timestamp)
+
+
+def add_days(dt: datetime, days: int) -> datetime:
+    """为 datetime 添加指定天数。
+
+    Args:
+        dt: datetime 对象
+        days: 要添加的天数(可为负数)
+
+    Returns:
+        新的 datetime 对象
+    """
+    return dt + timedelta(days=days)
+
+
+def add_hours(dt: datetime, hours: int) -> datetime:
+    """为 datetime 添加指定小时数。
+
+    Args:
+        dt: datetime 对象
+        hours: 要添加的小时数(可为负数)
+
+    Returns:
+        新的 datetime 对象
+    """
+    return dt + timedelta(hours=hours)
+
+
+def add_minutes(dt: datetime, minutes: int) -> datetime:
+    """为 datetime 添加指定分钟数。
+
+    Args:
+        dt: datetime 对象
+        minutes: 要添加的分钟数(可为负数)
+
+    Returns:
+        新的 datetime 对象
+    """
+    return dt + timedelta(minutes=minutes)
+
+
+def get_week_start(dt: datetime | None = None) -> datetime:
+    """获取给定日期所在周的周一(00:00:00)。
+
+    Args:
+        dt: datetime 对象,默认为当前时间
+
+    Returns:
+        该周周一的 datetime 对象(时间为 00:00:00)
+    """
+    if dt is None:
+        dt = datetime.now()
+    # weekday() 返回 0=Monday, 6=Sunday
+    days_since_monday = dt.weekday()
+    monday = dt - timedelta(days=days_since_monday)
+    return monday.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def get_month_start(dt: datetime | None = None) -> datetime:
+    """获取给定日期所在月的第一天(00:00:00)。
+
+    Args:
+        dt: datetime 对象,默认为当前时间
+
+    Returns:
+        该月第一天的 datetime 对象(时间为 00:00:00)
+    """
+    if dt is None:
+        dt = datetime.now()
+    return dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)

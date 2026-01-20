@@ -5,7 +5,7 @@ Provides common configurations and reusable mixins for all Pydantic models.
 """
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
@@ -38,7 +38,7 @@ class BaseModel(PydanticBaseModel):
         extra="ignore",
     )
 
-    def model_dump_json_safe(self) -> Dict[str, Any]:
+    def model_dump_json_safe(self) -> dict[str, Any]:
         """Dump model to JSON-safe dictionary.
 
         转储模型为JSON安全的字典。

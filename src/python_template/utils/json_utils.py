@@ -6,7 +6,7 @@
 import json
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import aiofiles
 
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 def read_json(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     default: Any = None,
 ) -> Any:
@@ -53,7 +53,7 @@ def read_json(
 
 def write_json(
     data: Any,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     indent: int = 2,
     ensure_ascii: bool = False,
@@ -117,10 +117,10 @@ def safe_json_loads(
 def safe_json_dumps(
     obj: Any,
     default: Any = None,
-    indent: Optional[int] = None,
+    indent: int | None = None,
     ensure_ascii: bool = False,
     **kwargs,
-) -> Optional[str]:
+) -> str | None:
     """安全地序列化对象为 JSON 字符串。
 
     Args:
@@ -148,9 +148,9 @@ def safe_json_dumps(
 
 
 def merge_json_files(
-    file_paths: List[Union[str, Path]],
-    output_path: Optional[Union[str, Path]] = None,
-) -> Optional[Dict[str, Any]]:
+    file_paths: list[str | Path],
+    output_path: str | Path | None = None,
+) -> dict[str, Any] | None:
     """合并多个 JSON 文件。
 
     Args:
@@ -197,7 +197,7 @@ def pretty_print_json(data: Any, indent: int = 2) -> None:
         print(data)
 
 
-def validate_json_schema(data: Dict[str, Any], required_keys: List[str]) -> bool:
+def validate_json_schema(data: dict[str, Any], required_keys: list[str]) -> bool:
     """验证 JSON 数据是否包含必需的键。
 
     Args:
@@ -227,7 +227,7 @@ def validate_json_schema(data: Dict[str, Any], required_keys: List[str]) -> bool
 
 
 async def async_read_json(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     default: Any = None,
 ) -> Any:
@@ -265,7 +265,7 @@ async def async_read_json(
 
 async def async_write_json(
     data: Any,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     encoding: str = "utf-8",
     indent: int = 2,
     ensure_ascii: bool = False,

@@ -11,7 +11,7 @@ Avoid unnecessary complexity in conditional statements. For single-line statemen
 
 Prioritize error handling and edge cases:
 
-Python 3.8+
+Python 3.10+
 Loguru for logging
 Ruff for linting and formatting
 uv for package management

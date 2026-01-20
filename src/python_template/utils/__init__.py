@@ -43,13 +43,18 @@ from .context import (
 
 # Date utilities
 from .date_utils import (
+    add_days,
+    add_hours,
+    add_minutes,
     format_datetime,
     from_unix_timestamp,
     get_current_date,
     get_current_time,
+    get_month_start,
     get_time_difference,
     get_timestamp,
     get_unix_timestamp,
+    get_week_start,
     humanize_timedelta,
     is_weekend,
     parse_datetime,
@@ -69,6 +74,8 @@ from .decorator_utils import (
 
 # File utilities
 from .file_utils import (
+    async_read_text_file,
+    async_write_text_file,
     calculate_file_hash,
     copy_file,
     delete_file,
@@ -84,6 +91,8 @@ from .file_utils import (
 
 # JSON utilities
 from .json_utils import (
+    async_read_json,
+    async_write_json,
     merge_json_files,
     pretty_print_json,
     read_json,
@@ -132,6 +141,8 @@ __all__ = [
     "merge_json_files",
     "pretty_print_json",
     "validate_json_schema",
+    "async_read_json",
+    "async_write_json",
     # File
     "ensure_directory",
     "get_file_size",
@@ -144,6 +155,8 @@ __all__ = [
     "read_text_file",
     "write_text_file",
     "sanitize_filename",
+    "async_read_text_file",
+    "async_write_text_file",
     # Decorators
     "timing_decorator",
     "retry_decorator",
@@ -164,6 +177,11 @@ __all__ = [
     "humanize_timedelta",
     "get_unix_timestamp",
     "from_unix_timestamp",
+    "add_days",
+    "add_hours",
+    "add_minutes",
+    "get_week_start",
+    "get_month_start",
     # Common
     "chunk_list",
     "flatten_dict",

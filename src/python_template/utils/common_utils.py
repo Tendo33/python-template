@@ -5,14 +5,14 @@
 
 import traceback
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .logger_util import get_logger
 
 logger = get_logger(__name__)
 
 
-def chunk_list(data: List[Any], chunk_size: int) -> List[List[Any]]:
+def chunk_list(data: list[Any], chunk_size: int) -> list[list[Any]]:
     """将列表分割成指定大小的块。
 
     Args:
@@ -37,8 +37,8 @@ def chunk_list(data: List[Any], chunk_size: int) -> List[List[Any]]:
 
 
 def flatten_dict(
-    nested_dict: Dict[str, Any], separator: str = ".", prefix: str = ""
-) -> Dict[str, Any]:
+    nested_dict: dict[str, Any], separator: str = ".", prefix: str = ""
+) -> dict[str, Any]:
     """展平嵌套字典。
 
     Args:
@@ -63,8 +63,8 @@ def flatten_dict(
 
 
 def unflatten_dict(
-    flattened_dict: Dict[str, Any], separator: str = "."
-) -> Dict[str, Any]:
+    flattened_dict: dict[str, Any], separator: str = "."
+) -> dict[str, Any]:
     """将展平的字典还原为嵌套结构。
 
     Args:
@@ -90,7 +90,7 @@ def unflatten_dict(
     return unflattened
 
 
-def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
+def merge_dicts(*dicts: dict[str, Any]) -> dict[str, Any]:
     """合并多个字典。
 
     Args:
@@ -109,10 +109,10 @@ def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def filter_dict(
-    data: Dict[str, Any],
-    allowed_keys: Optional[List[str]] = None,
-    excluded_keys: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    data: dict[str, Any],
+    allowed_keys: list[str] | None = None,
+    excluded_keys: list[str] | None = None,
+) -> dict[str, Any]:
     """根据允许或排除的键过滤字典。
 
     Args:
@@ -141,7 +141,7 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 
-def deep_merge_dict(base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:
+def deep_merge_dict(base: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:
     """深度合并两个字典。
 
     Args:
@@ -163,7 +163,7 @@ def deep_merge_dict(base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, A
 
 
 def safe_get(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     key_path: str,
     default: Any = None,
     separator: str = ".",
@@ -199,7 +199,7 @@ def safe_get(
 
 
 def safe_set(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     key_path: str,
     value: Any,
     separator: str = ".",
@@ -244,7 +244,7 @@ def safe_set(
         return False
 
 
-def remove_none_values(data: Dict[str, Any], recursive: bool = False) -> Dict[str, Any]:
+def remove_none_values(data: dict[str, Any], recursive: bool = False) -> dict[str, Any]:
     """移除字典中值为 None 的项。
 
     Args:
@@ -269,9 +269,9 @@ def remove_none_values(data: Dict[str, Any], recursive: bool = False) -> Dict[st
 
 
 def remove_empty_values(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     recursive: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """移除字典中的空值(None, "", [], {})。
 
     Args:
@@ -297,12 +297,12 @@ def remove_empty_values(
 
 
 def batch_process(
-    items: List[Any],
+    items: list[Any],
     batch_size: int,
     process_func,
     *args,
     **kwargs,
-) -> List[Any]:
+) -> list[Any]:
     """批量处理列表项。
 
     Args:

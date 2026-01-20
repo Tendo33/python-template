@@ -8,8 +8,9 @@ hierarchical context management.
 """
 
 import threading
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Optional, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -42,7 +43,7 @@ class Context:
             name: Context name for identification
         """
         self.name = name
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self._lock = threading.Lock()
 
     def set(self, key: str, value: Any) -> None:
@@ -57,7 +58,7 @@ class Context:
         with self._lock:
             self._data[key] = value
 
-    def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
+    def get(self, key: str, default: T | None = None) -> T | None:
         """Get a value from the context.
 
         从上下文中获取值。
@@ -144,7 +145,7 @@ class Context:
         with self._lock:
             return list(self._data.items())
 
-    def update(self, data: Dict[str, Any]) -> None:
+    def update(self, data: dict[str, Any]) -> None:
         """Update context with multiple key-value pairs.
 
         使用多个键值对更新上下文。
@@ -155,7 +156,7 @@ class Context:
         with self._lock:
             self._data.update(data)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert context to dictionary.
 
         将上下文转换为字典。
@@ -206,7 +207,7 @@ class ContextManager:
 
         初始化上下文管理器。
         """
-        self._contexts: Dict[str, Context] = {}
+        self._contexts: dict[str, Context] = {}
         self._lock = threading.Lock()
 
     def create_context(self, name: str) -> Context:
@@ -230,7 +231,7 @@ class ContextManager:
             self._contexts[name] = ctx
             return ctx
 
-    def get_context(self, name: str) -> Optional[Context]:
+    def get_context(self, name: str) -> Context | None:
         """Get a context by name.
 
         通过名称获取上下文。
@@ -298,8 +299,8 @@ class ContextManager:
 
 
 # Global context instances / 全局上下文实例
-_global_context: Optional[Context] = None
-_context_manager: Optional[ContextManager] = None
+_global_context: Context | None = None
+_context_manager: ContextManager | None = None
 
 
 def get_context(name: str = "global") -> Context:
@@ -339,7 +340,7 @@ def get_global_context() -> Context:
 
 @contextmanager
 def context_scope(
-    name: str, initial_data: Optional[Dict[str, Any]] = None
+    name: str, initial_data: dict[str, Any] | None = None
 ) -> Generator[Context, None, None]:
     """Context manager for scoped context operations.
 
@@ -389,7 +390,7 @@ def set_global(key: str, value: Any) -> None:
     get_global_context().set(key, value)
 
 
-def get_global(key: str, default: Optional[T] = None) -> Optional[T]:
+def get_global(key: str, default: T | None = None) -> T | None:
     """Get a value from the global context.
 
     从全局上下文中获取值。
