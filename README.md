@@ -165,6 +165,41 @@ def calculate(a, b):
     return a + b
 ```
 
+#### 异步装饰器 (Async Decorators)
+
+```python
+from python_template.utils import (
+    async_timing_decorator,
+    async_retry_decorator,
+    async_catch_exceptions,
+    AsyncContextTimer,
+)
+
+# 异步计时装饰器
+@async_timing_decorator
+async def fetch_data():
+    await asyncio.sleep(1)
+    return "data"
+
+# 异步重试装饰器
+@async_retry_decorator(max_retries=3, delay=1.0)
+async def unstable_api_call():
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
+
+# 异步异常捕获装饰器
+@async_catch_exceptions(default_return=None)
+async def safe_fetch():
+    # ... 可能失败的异步操作
+    pass
+
+# 异步上下文计时器
+async def process():
+    async with AsyncContextTimer("异步数据处理"):
+        await heavy_async_operation()
+```
+
 ### 4. 通用工具 (Common Utils)
 
 ```python

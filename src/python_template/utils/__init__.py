@@ -63,7 +63,12 @@ from .date_utils import (
 
 # Decorator utilities
 from .decorator_utils import (
+    AsyncContextTimer,
     ContextTimer,
+    async_catch_exceptions,
+    async_log_calls,
+    async_retry_decorator,
+    async_timing_decorator,
     catch_exceptions,
     deprecated,
     log_calls,
@@ -157,7 +162,7 @@ __all__ = [
     "sanitize_filename",
     "async_read_text_file",
     "async_write_text_file",
-    # Decorators
+    # Decorators (sync)
     "timing_decorator",
     "retry_decorator",
     "catch_exceptions",
@@ -165,6 +170,12 @@ __all__ = [
     "deprecated",
     "singleton",
     "ContextTimer",
+    # Decorators (async)
+    "async_timing_decorator",
+    "async_retry_decorator",
+    "async_catch_exceptions",
+    "async_log_calls",
+    "AsyncContextTimer",
     # Date/Time
     "get_timestamp",
     "parse_timestamp",
@@ -206,4 +217,9 @@ __all__ = [
     "get_global",
     "get_global_context",
     "set_global",
+    "AsyncContextTimer",
+    "async_catch_exceptions",
+    "async_log_calls",
+    "async_retry_decorator",
+    "async_timing_decorator",
 ]
