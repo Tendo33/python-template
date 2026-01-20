@@ -4,11 +4,10 @@ Provides common configurations and reusable mixins for all Pydantic models.
 为所有Pydantic模型提供通用配置和可复用的Mixin。
 """
 
-from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -47,41 +46,3 @@ class BaseModel(PydanticBaseModel):
             Dictionary with JSON-serializable values
         """
         return self.model_dump(mode="json")
-
-
-class TimestampMixin(BaseModel):
-    """Mixin for adding timestamp fields to models.
-
-    为模型添加时间戳字段的Mixin。
-
-    Provides created_at and updated_at fields that can be included
-    in any model that needs timestamp tracking.
-
-    提供created_at和updated_at字段，可用于任何需要时间戳追踪的模型。
-
-    Example:
-        >>> from datetime import datetime
-        >>> from pydantic import Field
-        >>>
-        >>> class Article(TimestampMixin):
-        ...     title: str
-        ...     content: str
-        >>>
-        >>> article = Article(title="Hello", content="World", created_at=datetime.now())
-    """
-
-    created_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Timestamp when the record was created / 记录创建时间戳",
-    )
-    updated_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Timestamp when the record was last updated / 记录最后更新时间戳",
-    )
-
-    def touch(self) -> None:
-        """Update the updated_at timestamp to current time.
-
-        更新updated_at时间戳为当前时间。
-        """
-        self.updated_at = datetime.now()
