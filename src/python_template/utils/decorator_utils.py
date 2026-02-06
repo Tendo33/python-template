@@ -1,204 +1,331 @@
 """Decorator utilities module.
 
-提供常用的装饰器函数。
+Provides unified decorator functions that automatically handle synchronous and asynchronous functions.
 """
 
 import asyncio
+import functools
 import time
 import traceback
 from collections.abc import Callable, Coroutine
-from functools import wraps
-from typing import Any
+from typing import Any, ParamSpec, TypeVar
 
 from .logger_util import get_logger
+
+P = ParamSpec("P")
+R = TypeVar("R")
+T = TypeVar("T")
 
 logger = get_logger(__name__)
 
 
-def timing_decorator(func: Callable) -> Callable:
-    """计算函数执行时间的装饰器。
+# =============================================================================
+# Unified Decorators - Auto-detect Sync/Async
+# =============================================================================
+
+
+def timing(
+    func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
+    """Decorator to measure execution time (auto-detects sync/async).
 
     Args:
-        func: 要装饰的函数
-
-    Returns:
-        装饰后的函数
+        func: The function to decorate
     """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        try:
-            result = func(*args, **kwargs)
-            return result
-        except Exception as e:
-            logger.error(f"Exception in {func.__name__}: {e}")
-            logger.debug(f"Traceback:\n{traceback.format_exc()}")
-            raise
-        finally:
-            end_time = time.perf_counter()
-            execution_time = end_time - start_time
-            logger.info(
-                f"⏱️  Function '{func.__name__}' executed in {execution_time:.4f} seconds"
-            )
-
-    return wrapper
+    if asyncio.iscoroutinefunction(func):
+        return _async_timing_impl(func)
+    return _sync_timing_impl(func)
 
 
-def retry_decorator(
+def retry(
     max_retries: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
     exceptions: tuple[type[BaseException], ...] = (Exception,),
-) -> Callable:
-    """失败重试装饰器。
+) -> Callable[
+    [Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]],
+    Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+]:
+    """Decorator to retry function execution on failure (auto-detects sync/async).
 
     Args:
-        max_retries: 最大重试次数
-        delay: 初始延迟时间(秒)
-        backoff: 延迟时间的倍增系数
-        exceptions: 要捕获的异常类型元组
-
-    Returns:
-        装饰器函数
+        max_retries: Maximum number of retries
+        delay: Initial delay between retries in seconds
+        backoff: Multiplier for delay after each retry
+        exceptions: Tuple of exceptions to catch
     """
 
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            current_delay = delay
-            last_exception: BaseException | None = None
-
-            for attempt in range(max_retries + 1):
-                try:
-                    return func(*args, **kwargs)
-                except exceptions as e:
-                    last_exception = e
-                    if attempt < max_retries:
-                        logger.warning(
-                            f"🔄 Function '{func.__name__}' failed (attempt {attempt + 1}/"
-                            f"{max_retries + 1}): {e}. Retrying in {current_delay:.2f}s"
-                        )
-                        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-                        time.sleep(current_delay)
-                        current_delay *= backoff
-                    else:
-                        logger.error(
-                            f"❌ Function '{func.__name__}' failed after "
-                            f"{max_retries + 1} attempts: {e}"
-                        )
-                        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-
-            if last_exception is not None:
-                raise last_exception
-            raise RuntimeError("Unexpected state: no exception captured")
-
-        return wrapper
+    def decorator(
+        func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+    ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
+        if asyncio.iscoroutinefunction(func):
+            return _async_retry_impl(func, max_retries, delay, backoff, exceptions)
+        return _sync_retry_impl(func, max_retries, delay, backoff, exceptions)
 
     return decorator
 
 
 def catch_exceptions(
     default_return: Any = None,
-    log_traceback: bool = True,
+    exceptions: tuple[type[BaseException], ...] = (Exception,),
     reraise: bool = False,
-) -> Callable:
-    """捕获异常的装饰器。
+) -> Callable[
+    [Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]],
+    Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+]:
+    """Decorator to catch exceptions and return default value (auto-detects sync/async).
 
     Args:
-        default_return: 发生异常时的默认返回值
-        log_traceback: 是否记录完整的 traceback
-        reraise: 是否重新抛出异常
-
-    Returns:
-        装饰器函数
+        default_return: Value to return if exception occurs
+        exceptions: Tuple of exceptions to catch
+        reraise: Whether to re-raise the exception after logging
     """
 
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
+    def decorator(
+        func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+    ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
+        if asyncio.iscoroutinefunction(func):
+            return _async_catch_impl(func, default_return, exceptions, reraise)
+        return _sync_catch_impl(func, default_return, exceptions, reraise)
+
+    return decorator
+
+
+def log_calls(
+    level: str = "DEBUG",
+    log_args: bool = True,
+    log_result: bool = True,
+) -> Callable[
+    [Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]],
+    Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+]:
+    """Decorator to log function calls (auto-detects sync/async).
+
+    Args:
+        level: Log level (DEBUG, INFO, etc.)
+        log_args: Whether to log arguments
+        log_result: Whether to log result
+    """
+
+    def decorator(
+        func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+    ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
+        if asyncio.iscoroutinefunction(func):
+            return _async_log_calls_impl(func, level, log_args, log_result)
+        return _sync_log_calls_impl(func, level, log_args, log_result)
+
+    return decorator
+
+
+# =============================================================================
+# Helper Implementations - Sync
+# =============================================================================
+
+
+def _sync_timing_impl(func: Callable[P, R]) -> Callable[P, R]:
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        logger.debug(f"{func.__name__} took {end_time - start_time:.4f}s")
+        return result
+
+    return wrapper
+
+
+def _sync_retry_impl(
+    func: Callable[P, R],
+    max_retries: int,
+    delay: float,
+    backoff: float,
+    exceptions: tuple[type[BaseException], ...],
+) -> Callable[P, R]:
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        current_delay = delay
+        last_exception: Exception | None = None
+
+        for attempt in range(max_retries + 1):
             try:
                 return func(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Exception in {func.__name__}: {e}")
-                if log_traceback:
-                    logger.debug(f"Traceback:\n{traceback.format_exc()}")
-
-                if reraise:
-                    raise
-
-                return default_return
-
-        return wrapper
-
-    return decorator
-
-
-def log_calls(log_args: bool = True, log_result: bool = True) -> Callable:
-    """记录函数调用的装饰器。
-
-    Args:
-        log_args: 是否记录参数
-        log_result: 是否记录返回值
-
-    Returns:
-        装饰器函数
-    """
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            func_name = func.__name__
-
-            if log_args:
-                logger.debug(
-                    f"📞 Calling {func_name} with args={args}, kwargs={kwargs}"
-                )
-            else:
-                logger.debug(f"📞 Calling {func_name}")
-
-            try:
-                result = func(*args, **kwargs)
-
-                if log_result:
-                    logger.debug(f"✅ {func_name} returned: {result}")
+            except exceptions as e:
+                last_exception = e
+                if attempt < max_retries:
+                    logger.warning(
+                        f"Attempt {attempt + 1}/{max_retries + 1} failed: {e}. Retrying in {current_delay}s"
+                    )
+                    time.sleep(current_delay)
+                    current_delay *= backoff
                 else:
-                    logger.debug(f"✅ {func_name} completed")
+                    logger.error(f"All {max_retries + 1} attempts failed")
 
-                return result
+        if last_exception:
+            raise last_exception
+        raise RuntimeError("Unexpected state")
 
-            except Exception as e:
-                logger.error(f"❌ Exception in {func_name}: {e}")
-                logger.debug(f"Traceback:\n{traceback.format_exc()}")
+    return wrapper
+
+
+def _sync_catch_impl(
+    func: Callable[P, R],
+    default_return: Any,
+    exceptions: tuple[type[BaseException], ...],
+    reraise: bool,
+) -> Callable[P, R]:
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        try:
+            return func(*args, **kwargs)
+        except exceptions as e:
+            logger.error(f"Error in {func.__name__}: {e}\n{traceback.format_exc()}")
+            if reraise:
                 raise
+            return default_return
 
-        return wrapper
-
-    return decorator
+    return wrapper
 
 
-def deprecated(reason: str = "", alternative: str | None = None) -> Callable:
-    """标记函数为已弃用的装饰器。
+def _sync_log_calls_impl(
+    func: Callable[P, R], level: str, log_args: bool, log_result: bool
+) -> Callable[P, R]:
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        if log_args:
+            logger.log(
+                level, f"Calling {func.__name__} with args={args} kwargs={kwargs}"
+            )
+        else:
+            logger.log(level, f"Calling {func.__name__}")
+
+        result = func(*args, **kwargs)
+
+        if log_result:
+            logger.log(level, f"{func.__name__} returned: {result}")
+        else:
+            logger.log(level, f"{func.__name__} completed")
+
+        return result
+
+    return wrapper
+
+
+# =============================================================================
+# Helper Implementations - Async
+# =============================================================================
+
+
+def _async_timing_impl(
+    func: Callable[P, Coroutine[Any, Any, R]],
+) -> Callable[P, Coroutine[Any, Any, R]]:
+    @functools.wraps(func)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        start_time = time.perf_counter()
+        result = await func(*args, **kwargs)
+        end_time = time.perf_counter()
+        logger.debug(f"{func.__name__} took {end_time - start_time:.4f}s")
+        return result
+
+    return wrapper
+
+
+def _async_retry_impl(
+    func: Callable[P, Coroutine[Any, Any, R]],
+    max_retries: int,
+    delay: float,
+    backoff: float,
+    exceptions: tuple[type[BaseException], ...],
+) -> Callable[P, Coroutine[Any, Any, R]]:
+    @functools.wraps(func)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        current_delay = delay
+        last_exception: Exception | None = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                return await func(*args, **kwargs)
+            except exceptions as e:
+                last_exception = e
+                if attempt < max_retries:
+                    logger.warning(
+                        f"Attempt {attempt + 1}/{max_retries + 1} failed: {e}. Retrying in {current_delay}s"
+                    )
+                    await asyncio.sleep(current_delay)
+                    current_delay *= backoff
+                else:
+                    logger.error(f"All {max_retries + 1} attempts failed")
+
+        if last_exception:
+            raise last_exception
+        raise RuntimeError("Unexpected state")
+
+    return wrapper
+
+
+def _async_catch_impl(
+    func: Callable[P, Coroutine[Any, Any, R]],
+    default_return: Any,
+    exceptions: tuple[type[BaseException], ...],
+    reraise: bool,
+) -> Callable[P, Coroutine[Any, Any, R]]:
+    @functools.wraps(func)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        try:
+            return await func(*args, **kwargs)
+        except exceptions as e:
+            logger.error(f"Error in {func.__name__}: {e}\n{traceback.format_exc()}")
+            if reraise:
+                raise
+            return default_return
+
+    return wrapper
+
+
+def _async_log_calls_impl(
+    func: Callable[P, Coroutine[Any, Any, R]],
+    level: str,
+    log_args: bool,
+    log_result: bool,
+) -> Callable[P, Coroutine[Any, Any, R]]:
+    @functools.wraps(func)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        if log_args:
+            logger.log(
+                level, f"Calling {func.__name__} with args={args} kwargs={kwargs}"
+            )
+        else:
+            logger.log(level, f"Calling {func.__name__}")
+
+        result = await func(*args, **kwargs)
+
+        if log_result:
+            logger.log(level, f"{func.__name__} returned: {result}")
+        else:
+            logger.log(level, f"{func.__name__} completed")
+
+        return result
+
+    return wrapper
+
+
+# =============================================================================
+# Other Decorators
+# =============================================================================
+
+
+def deprecated(reason: str = "") -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Decorator to mark a function as deprecated.
 
     Args:
-        reason: 弃用原因
-        alternative: 推荐的替代方案
-
-    Returns:
-        装饰器函数
+        reason: Reason for deprecation
     """
 
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            message = f"⚠️  Function '{func.__name__}' is deprecated"
-            if reason:
-                message += f": {reason}"
-            if alternative:
-                message += f". Use '{alternative}' instead"
-
-            logger.warning(message)
-
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        @functools.wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            logger.warning(
+                f"DeprecationWarning: {func.__name__} is deprecated. {reason}"
+            )
             return func(*args, **kwargs)
 
         return wrapper
@@ -206,336 +333,113 @@ def deprecated(reason: str = "", alternative: str | None = None) -> Callable:
     return decorator
 
 
-def singleton(cls):
-    """单例模式装饰器。
+def singleton(cls: type[T]) -> type[T]:
+    """Decorator to make a class a singleton.
 
     Args:
-        cls: 要装饰的类
-
-    Returns:
-        装饰后的类
+        cls: Class to decorate
     """
-    instances = {}
+    instances: dict[type[T], T] = {}
 
-    @wraps(cls)
-    def get_instance(*args, **kwargs):
+    @functools.wraps(cls)
+    def wrapper(*args: Any, **kwargs: Any) -> T:
         if cls not in instances:
             instances[cls] = cls(*args, **kwargs)
-            logger.debug(f"Created singleton instance of {cls.__name__}")
         return instances[cls]
 
-    return get_instance
+    return wrapper  # type: ignore
+
+
+# =============================================================================
+# Context Managers as Decorators
+# =============================================================================
 
 
 class ContextTimer:
-    """上下文管理器,用于计时代码块执行时间。
+    """Context manager to measure execution time."""
 
-    Example:
-        with ContextTimer("数据处理"):
-            # 执行耗时操作
-            process_data()
-    """
-
-    def __init__(self, name: str = "operation", log_level: str = "INFO"):
-        """初始化计时器。
-
-        Args:
-            name: 操作名称
-            log_level: 日志级别
-        """
+    def __init__(self, name: str = "Operation"):
         self.name = name
-        self.log_level = log_level.upper()
-        self.start_time: float | None = None
-        self.end_time: float | None = None
-
-    def __enter__(self):
-        """开始计时。"""
-        self.start_time = time.perf_counter()
-        logger.debug(f"⏱️  Starting timer for: {self.name}")
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """停止计时并记录结果。"""
-        self.end_time = time.perf_counter()
-        if self.start_time is None:
-            return
-        execution_time = self.end_time - self.start_time
-
-        if exc_type is not None:
-            logger.error(
-                f"❌ Operation '{self.name}' failed after {execution_time:.4f} seconds"
-            )
-            logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        else:
-            log_func = getattr(logger, self.log_level.lower(), logger.info)
-            log_func(
-                f"✅ Operation '{self.name}' completed in {execution_time:.4f} seconds"
-            )
+        self.start_time: float = 0
+        self._elapsed_time: float | None = None
 
     @property
     def elapsed_time(self) -> float | None:
-        """获取已经过的时间。
+        """Get elapsed time in seconds.
 
-        Returns:
-            已经过的时间(秒),如果未开始则返回 None
+        If the timer is still running, returns time since start.
+        If the timer has stopped, returns total duration.
+        If the timer hasn't started, returns None.
         """
-        if self.start_time is None:
-            return None
+        if self._elapsed_time is not None:
+            return self._elapsed_time
+        if self.start_time > 0:
+            return time.perf_counter() - self.start_time
+        return None
 
-        end_time = self.end_time or time.perf_counter()
-        return end_time - self.start_time
+    def __enter__(self) -> "ContextTimer":
+        self.start_time = time.perf_counter()
+        return self
 
-
-# =============================================================================
-# Async Decorators (异步装饰器)
-# =============================================================================
-
-
-def async_timing_decorator(func: Callable[..., Coroutine]) -> Callable[..., Coroutine]:
-    """计算异步函数执行时间的装饰器。
-
-    Args:
-        func: 要装饰的异步函数
-
-    Returns:
-        装饰后的异步函数
-
-    Example:
-        @async_timing_decorator
-        async def fetch_data():
-            await asyncio.sleep(1)
-            return "data"
-    """
-
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        try:
-            result = await func(*args, **kwargs)
-            return result
-        except Exception as e:
-            logger.error(f"Exception in {func.__name__}: {e}")
-            logger.debug(f"Traceback:\n{traceback.format_exc()}")
-            raise
-        finally:
-            end_time = time.perf_counter()
-            execution_time = end_time - start_time
-            logger.info(
-                f"⏱️  Async function '{func.__name__}' executed in {execution_time:.4f} seconds"
-            )
-
-    return wrapper
-
-
-def async_retry_decorator(
-    max_retries: int = 3,
-    delay: float = 1.0,
-    backoff: float = 2.0,
-    exceptions: tuple[type[BaseException], ...] = (Exception,),
-) -> Callable[[Callable[..., Coroutine]], Callable[..., Coroutine]]:
-    """异步失败重试装饰器。
-
-    Args:
-        max_retries: 最大重试次数
-        delay: 初始延迟时间(秒)
-        backoff: 延迟时间的倍增系数
-        exceptions: 要捕获的异常类型元组
-
-    Returns:
-        装饰器函数
-
-    Example:
-        @async_retry_decorator(max_retries=3, delay=1.0)
-        async def unstable_api_call():
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    return await response.json()
-    """
-
-    def decorator(func: Callable[..., Coroutine]) -> Callable[..., Coroutine]:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            current_delay = delay
-            last_exception: BaseException | None = None
-
-            for attempt in range(max_retries + 1):
-                try:
-                    return await func(*args, **kwargs)
-                except exceptions as e:
-                    last_exception = e
-                    if attempt < max_retries:
-                        logger.warning(
-                            f"🔄 Async function '{func.__name__}' failed "
-                            f"(attempt {attempt + 1}/{max_retries + 1}): {e}. "
-                            f"Retrying in {current_delay:.2f}s"
-                        )
-                        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-                        await asyncio.sleep(current_delay)
-                        current_delay *= backoff
-                    else:
-                        logger.error(
-                            f"❌ Async function '{func.__name__}' failed after "
-                            f"{max_retries + 1} attempts: {e}"
-                        )
-                        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-
-            if last_exception is not None:
-                raise last_exception
-            raise RuntimeError("Unexpected state: no exception captured")
-
-        return wrapper
-
-    return decorator
-
-
-def async_catch_exceptions(
-    default_return: Any = None,
-    log_traceback: bool = True,
-    reraise: bool = False,
-) -> Callable[[Callable[..., Coroutine]], Callable[..., Coroutine]]:
-    """捕获异步函数异常的装饰器。
-
-    Args:
-        default_return: 发生异常时的默认返回值
-        log_traceback: 是否记录完整的 traceback
-        reraise: 是否重新抛出异常
-
-    Returns:
-        装饰器函数
-
-    Example:
-        @async_catch_exceptions(default_return=None)
-        async def safe_fetch():
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    return await response.json()
-    """
-
-    def decorator(func: Callable[..., Coroutine]) -> Callable[..., Coroutine]:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            try:
-                return await func(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Exception in {func.__name__}: {e}")
-                if log_traceback:
-                    logger.debug(f"Traceback:\n{traceback.format_exc()}")
-
-                if reraise:
-                    raise
-
-                return default_return
-
-        return wrapper
-
-    return decorator
-
-
-def async_log_calls(
-    log_args: bool = True, log_result: bool = True
-) -> Callable[[Callable[..., Coroutine]], Callable[..., Coroutine]]:
-    """记录异步函数调用的装饰器。
-
-    Args:
-        log_args: 是否记录参数
-        log_result: 是否记录返回值
-
-    Returns:
-        装饰器函数
-
-    Example:
-        @async_log_calls(log_args=True, log_result=True)
-        async def process_data(data):
-            await asyncio.sleep(0.1)
-            return {"processed": data}
-    """
-
-    def decorator(func: Callable[..., Coroutine]) -> Callable[..., Coroutine]:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            func_name = func.__name__
-
-            if log_args:
-                logger.debug(
-                    f"📞 Calling async {func_name} with args={args}, kwargs={kwargs}"
-                )
-            else:
-                logger.debug(f"📞 Calling async {func_name}")
-
-            try:
-                result = await func(*args, **kwargs)
-
-                if log_result:
-                    logger.debug(f"✅ Async {func_name} returned: {result}")
-                else:
-                    logger.debug(f"✅ Async {func_name} completed")
-
-                return result
-
-            except Exception as e:
-                logger.error(f"❌ Exception in async {func_name}: {e}")
-                logger.debug(f"Traceback:\n{traceback.format_exc()}")
-                raise
-
-        return wrapper
-
-    return decorator
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        end_time = time.perf_counter()
+        self._elapsed_time = end_time - self.start_time
+        logger.debug(f"{self.name} took {self._elapsed_time:.4f}s")
 
 
 class AsyncContextTimer:
-    """异步上下文管理器,用于计时异步代码块执行时间。
+    """Async context manager to measure execution time."""
 
-    Example:
-        async with AsyncContextTimer("异步数据处理"):
-            await process_data()
-    """
-
-    def __init__(self, name: str = "operation", log_level: str = "INFO"):
-        """初始化计时器。
-
-        Args:
-            name: 操作名称
-            log_level: 日志级别
-        """
+    def __init__(self, name: str = "Operation"):
         self.name = name
-        self.log_level = log_level.upper()
-        self.start_time: float | None = None
-        self.end_time: float | None = None
-
-    async def __aenter__(self) -> "AsyncContextTimer":
-        """开始计时。"""
-        self.start_time = time.perf_counter()
-        logger.debug(f"⏱️  Starting async timer for: {self.name}")
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """停止计时并记录结果。"""
-        self.end_time = time.perf_counter()
-        if self.start_time is None:
-            return
-
-        execution_time = self.end_time - self.start_time
-
-        if exc_type is not None:
-            logger.error(
-                f"❌ Async operation '{self.name}' failed after {execution_time:.4f} seconds"
-            )
-            logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        else:
-            log_func = getattr(logger, self.log_level.lower(), logger.info)
-            log_func(
-                f"✅ Async operation '{self.name}' completed in {execution_time:.4f} seconds"
-            )
+        self.start_time: float = 0
+        self._elapsed_time: float | None = None
 
     @property
     def elapsed_time(self) -> float | None:
-        """获取已经过的时间。
+        """Get elapsed time in seconds.
 
-        Returns:
-            已经过的时间(秒),如果未开始则返回 None
+        If the timer is still running, returns time since start.
+        If the timer has stopped, returns total duration.
+        If the timer hasn't started, returns None.
         """
-        if self.start_time is None:
-            return None
+        if self._elapsed_time is not None:
+            return self._elapsed_time
+        if self.start_time > 0:
+            return time.perf_counter() - self.start_time
+        return None
 
-        end_time = self.end_time or time.perf_counter()
-        return end_time - self.start_time
+    async def __aenter__(self) -> "AsyncContextTimer":
+        self.start_time = time.perf_counter()
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        end_time = time.perf_counter()
+        self._elapsed_time = end_time - self.start_time
+        logger.debug(f"{self.name} took {self._elapsed_time:.4f}s")
+
+
+# Aliases for compatibility
+timing_decorator = timing
+retry_decorator = retry
+async_timing_decorator = timing
+async_retry_decorator = retry
+async_catch_exceptions = catch_exceptions
+async_log_calls = log_calls
+
+__all__ = [
+    "timing",
+    "retry",
+    "catch_exceptions",
+    "log_calls",
+    "deprecated",
+    "singleton",
+    "ContextTimer",
+    "AsyncContextTimer",
+    "timing_decorator",
+    "retry_decorator",
+    "async_timing_decorator",
+    "async_retry_decorator",
+    "async_catch_exceptions",
+    "async_log_calls",
+]

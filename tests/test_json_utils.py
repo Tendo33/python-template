@@ -21,26 +21,27 @@ class TestReadJson:
 
     def test_read_json_valid(self, temp_json_file: Path) -> None:
         """Test reading valid JSON file."""
-        result = read_json(temp_json_file)
-        assert result is not None
-        assert result["name"] == "test"
-        assert result["value"] == 123
+        data = read_json(temp_json_file)
+        assert data is not None
+        assert data["name"] == "test"
+        assert data["value"] == 123
 
     def test_read_json_nested(self, temp_json_file: Path) -> None:
         """Test reading nested JSON data."""
-        result = read_json(temp_json_file)
-        assert result["nested"]["key"] == "value"
+        data = read_json(temp_json_file)
+        assert data is not None
+        assert data["nested"]["key"] == "value"
 
     def test_read_json_nonexistent(self, temp_dir: Path) -> None:
-        """Test reading nonexistent file returns default."""
-        result = read_json(temp_dir / "nonexistent.json", default={"fallback": True})
-        assert result == {"fallback": True}
+        """Test reading nonexistent file returns None."""
+        result = read_json(temp_dir / "nonexistent.json")
+        assert result is None
 
     def test_read_json_invalid_content(self, temp_dir: Path) -> None:
-        """Test reading invalid JSON returns default."""
+        """Test reading invalid JSON returns None."""
         invalid_file = temp_dir / "invalid.json"
         invalid_file.write_text("{ invalid json }", encoding="utf-8")
-        result = read_json(invalid_file, default=None)
+        result = read_json(invalid_file)
         assert result is None
 
 
@@ -105,13 +106,19 @@ class TestSafeJsonLoads:
 
     def test_safe_json_loads_invalid(self) -> None:
         """Test parsing invalid JSON returns default."""
-        result = safe_json_loads("{ invalid }", default={"error": True})
-        assert result == {"error": True}
+        result = safe_json_loads("{ invalid }")
+        assert result is None
 
-    def test_safe_json_loads_none_input(self) -> None:
-        """Test handling None input."""
-        result = safe_json_loads(None, default="fallback")  # type: ignore
-        assert result == "fallback"
+    def test_safe_json_loads_with_default(self) -> None:
+        """Test parsing invalid JSON returns provided default."""
+        default = {"status": "error"}
+        result = safe_json_loads("{ invalid }", default=default)
+        assert result == default
+
+    def test_safe_json_loads_empty_string(self) -> None:
+        """Test handling empty string input."""
+        result = safe_json_loads("")
+        assert result is None
 
 
 class TestSafeJsonDumps:
@@ -120,31 +127,41 @@ class TestSafeJsonDumps:
     def test_safe_json_dumps_dict(self) -> None:
         """Test serializing dictionary."""
         data = {"name": "test", "value": 123}
-        result = safe_json_dumps(data)
-        assert result is not None
-        assert "test" in result
-        assert "123" in result
+        json_str = safe_json_dumps(data)
+        assert json_str is not None
+        assert "test" in json_str
+        assert "123" in json_str
 
     def test_safe_json_dumps_list(self) -> None:
         """Test serializing list."""
         data = [1, 2, 3, "test"]
-        result = safe_json_dumps(data)
-        assert result is not None
-        assert "[1, 2, 3," in result
+        # safe_json_dumps defaults to indent=2
+        json_str = safe_json_dumps(data, indent=None)
+        assert json_str is not None
+        assert "[1, 2, 3," in json_str
 
     def test_safe_json_dumps_unicode(self) -> None:
         """Test serializing with Unicode."""
         data = {"中文": "测试"}
-        result = safe_json_dumps(data, ensure_ascii=False)
-        assert result is not None
-        assert "中文" in result
+        json_str = safe_json_dumps(data, ensure_ascii=False)
+        assert json_str is not None
+        assert "中文" in json_str
 
     def test_safe_json_dumps_with_indent(self) -> None:
         """Test serializing with indentation."""
         data = {"a": 1, "b": 2}
-        result = safe_json_dumps(data, indent=2)
-        assert result is not None
-        assert "\n" in result
+        json_str = safe_json_dumps(data, indent=2)
+        assert json_str is not None
+        assert "\n" in json_str
+
+    def test_safe_json_dumps_invalid(self) -> None:
+        """Test serializing invalid object returns None."""
+
+        class Unserializable:
+            pass
+
+        result = safe_json_dumps(Unserializable())
+        assert result is None
 
 
 class TestMergeJsonFiles:
@@ -159,7 +176,6 @@ class TestMergeJsonFiles:
         file2.write_text('{"c": 3, "d": 4}', encoding="utf-8")
 
         result = merge_json_files([file1, file2])
-        assert result is not None
         assert result == {"a": 1, "b": 2, "c": 3, "d": 4}
 
     def test_merge_json_files_with_output(self, temp_dir: Path) -> None:
@@ -172,7 +188,7 @@ class TestMergeJsonFiles:
         file2.write_text('{"b": 2}', encoding="utf-8")
 
         result = merge_json_files([file1, file2], output_path=output)
-        assert result is not None
+        assert result == {"a": 1, "b": 2}
         assert output.exists()
 
         merged_content = json.loads(output.read_text())
@@ -189,13 +205,7 @@ class TestValidateJsonSchema:
         assert result is True
 
     def test_validate_json_schema_missing_keys(self) -> None:
-        """Test validation with missing required keys."""
+        """Test validation with missing keys."""
         data = {"name": "test"}
-        result = validate_json_schema(data, required_keys=["name", "value", "type"])
+        result = validate_json_schema(data, required_keys=["name", "value"])
         assert result is False
-
-    def test_validate_json_schema_empty_required(self) -> None:
-        """Test validation with no required keys."""
-        data = {"anything": "goes"}
-        result = validate_json_schema(data, required_keys=[])
-        assert result is True

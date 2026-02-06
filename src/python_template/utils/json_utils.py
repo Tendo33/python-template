@@ -1,10 +1,7 @@
-"""JSON utilities module.
+"""JSON utilities module."""
 
-提供 JSON 读写、序列化、反序列化等常用功能。
-"""
-
+import asyncio
 import json
-import traceback
 from pathlib import Path
 from typing import Any
 
@@ -15,40 +12,40 @@ from .logger_util import get_logger
 logger = get_logger(__name__)
 
 
+# =============================================================================
+# 同步 JSON 操作
+# =============================================================================
+
+
 def read_json(
     file_path: str | Path,
     encoding: str = "utf-8",
-    default: Any = None,
-) -> Any:
+) -> dict[str, Any] | list[Any] | None:
     """读取 JSON 文件。
 
     Args:
         file_path: JSON 文件路径
         encoding: 文件编码
-        default: 读取失败时返回的默认值
 
     Returns:
-        解析后的 JSON 数据,失败时返回 default
+        dict | list | None: 成功时返回解析后的 JSON 数据，失败返回 None
     """
     try:
         file_path = Path(file_path)
         if not file_path.exists():
-            logger.warning(f"JSON file not found: {file_path}")
-            return default
+            logger.error(f"File not found: {file_path}")
+            return None
 
         with open(file_path, encoding=encoding) as f:
             data = json.load(f)
-            logger.debug(f"Successfully read JSON from: {file_path}")
+            logger.debug(f"Read JSON from: {file_path}")
             return data
-
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error in {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return default
+        return None
     except Exception as e:
         logger.error(f"Failed to read JSON file {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return default
+        return None
 
 
 def write_json(
@@ -58,6 +55,7 @@ def write_json(
     indent: int = 2,
     ensure_ascii: bool = False,
     create_dirs: bool = True,
+    **kwargs: Any,
 ) -> bool:
     """写入 JSON 文件。
 
@@ -68,9 +66,10 @@ def write_json(
         indent: 缩进空格数
         ensure_ascii: 是否确保 ASCII 编码
         create_dirs: 是否自动创建父目录
+        **kwargs: 传递给 json.dumps 的其他参数
 
     Returns:
-        写入成功返回 True,失败返回 False
+        bool: 成功返回 True，失败返回 False
     """
     try:
         file_path = Path(file_path)
@@ -78,60 +77,60 @@ def write_json(
         if create_dirs:
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, "w", encoding=encoding) as f:
-            json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
-            logger.debug(f"Successfully wrote JSON to: {file_path}")
-            return True
+        json_str = json.dumps(
+            data,
+            indent=indent,
+            ensure_ascii=ensure_ascii,
+            **kwargs,
+        )
 
+        with open(file_path, "w", encoding=encoding) as f:
+            f.write(json_str)
+
+        logger.debug(f"Wrote JSON to: {file_path}")
+        return True
     except TypeError as e:
-        logger.error(f"Data is not JSON serializable: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+        logger.error(f"JSON serialization error: {e}")
         return False
     except Exception as e:
         logger.error(f"Failed to write JSON file {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
         return False
 
 
-def safe_json_loads(
-    json_str: str,
-    default: Any = None,
-) -> Any:
-    """安全地解析 JSON 字符串。
+def safe_json_loads(json_str: str, default: Any = None) -> Any:
+    """安全解析 JSON 字符串。
 
     Args:
         json_str: JSON 字符串
-        default: 解析失败时返回的默认值
+        default: 解析失败时的默认值
 
     Returns:
-        解析后的数据,失败时返回 default
+        解析后的数据或默认值
     """
     try:
         return json.loads(json_str)
-    except (json.JSONDecodeError, TypeError) as e:
-        logger.debug(f"Failed to parse JSON string: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+    except (TypeError, json.JSONDecodeError):
         return default
 
 
 def safe_json_dumps(
     obj: Any,
     default: Any = None,
-    indent: int | None = None,
+    indent: int = 2,
     ensure_ascii: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> str | None:
-    """安全地序列化对象为 JSON 字符串。
+    """安全序列化 JSON。
 
     Args:
         obj: 要序列化的对象
-        default: 不可序列化对象的默认处理函数
-        indent: 缩进空格数
-        ensure_ascii: 是否确保 ASCII 编码
-        **kwargs: 其他 json.dumps 参数
+        default: 序列化失败时的默认值 (如果提供)
+        indent: 缩进
+        ensure_ascii: 是否确保 ASCII
+        **kwargs: 传递给 json.dumps 的其他参数
 
     Returns:
-        JSON 字符串,失败时返回 None
+        str | None: 成功时返回 JSON 字符串
     """
     try:
         return json.dumps(
@@ -141,9 +140,11 @@ def safe_json_dumps(
             ensure_ascii=ensure_ascii,
             **kwargs,
         )
-    except (TypeError, ValueError) as e:
-        logger.debug(f"Failed to serialize to JSON: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+    except TypeError as e:
+        logger.error(f"JSON serialization error: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Failed to serialize JSON: {e}")
         return None
 
 
@@ -158,28 +159,26 @@ def merge_json_files(
         output_path: 输出文件路径(可选)
 
     Returns:
-        合并后的字典,失败时返回 None
+        dict | None: 成功时返回合并后的字典，失败返回 None
     """
-    try:
-        merged = {}
+    merged: dict[str, Any] = {}
 
-        for file_path in file_paths:
-            data = read_json(file_path)
-            if isinstance(data, dict):
-                merged.update(data)
-            else:
-                logger.warning(f"Skipping non-dict JSON file: {file_path}")
+    for path in file_paths:
+        data = read_json(path)
+        if data is None:
+            logger.error(f"Failed to read {path}")
+            return None
 
-        if output_path:
-            write_json(merged, output_path)
+        if isinstance(data, dict):
+            merged.update(data)
+        else:
+            logger.warning(f"Skipping non-dict JSON file: {path}")
 
-        logger.info(f"Merged {len(file_paths)} JSON files")
-        return merged
-
-    except Exception as e:
-        logger.error(f"Failed to merge JSON files: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+    if output_path and not write_json(merged, output_path):
+        logger.error(f"Failed to write merged JSON to {output_path}")
         return None
+
+    return merged
 
 
 def pretty_print_json(data: Any, indent: int = 2) -> None:
@@ -191,13 +190,15 @@ def pretty_print_json(data: Any, indent: int = 2) -> None:
     """
     try:
         print(json.dumps(data, indent=indent, ensure_ascii=False))
-    except Exception as e:
+    except TypeError as e:
         logger.error(f"Failed to pretty print JSON: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        print(data)
+        print(str(data))
 
 
-def validate_json_schema(data: dict[str, Any], required_keys: list[str]) -> bool:
+def validate_json_schema(
+    data: dict[str, Any],
+    required_keys: list[str],
+) -> bool:
     """验证 JSON 数据是否包含必需的键。
 
     Args:
@@ -205,62 +206,90 @@ def validate_json_schema(data: dict[str, Any], required_keys: list[str]) -> bool
         required_keys: 必需的键列表
 
     Returns:
-        验证通过返回 True,否则返回 False
+        bool: 验证通过返回 True
     """
-    try:
-        missing_keys = [key for key in required_keys if key not in data]
+    missing_keys = [key for key in required_keys if key not in data]
 
-        if missing_keys:
-            logger.warning(f"Missing required keys: {missing_keys}")
-            return False
-
-        logger.debug("JSON schema validation passed")
-        return True
-
-    except Exception as e:
-        logger.error(f"Failed to validate JSON schema: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
+    if missing_keys:
+        logger.error(f"Missing required keys: {missing_keys}")
         return False
 
+    return True
 
-# Async functions for I/O-bound operations
+
+def json_path_get(
+    data: dict[str, Any] | list[Any],
+    path: str,
+    separator: str = ".",
+) -> Any | None:
+    """使用路径从 JSON 数据中获取值。
+
+    Args:
+        data: JSON 数据
+        path: 路径字符串 (例如 "a.b.c" 或 "items.0.name")
+        separator: 路径分隔符
+
+    Returns:
+        Any | None: 成功时返回获取的值，失败返回 None
+    """
+    keys = path.split(separator)
+    current: Any = data
+
+    try:
+        for key in keys:
+            if isinstance(current, dict):
+                if key in current:
+                    current = current[key]
+                else:
+                    return None
+            elif isinstance(current, list):
+                index = int(key)
+                if 0 <= index < len(current):
+                    current = current[index]
+                else:
+                    return None
+            else:
+                return None
+        return current
+    except Exception:
+        return None
+
+
+# =============================================================================
+# 异步 JSON 操作
+# =============================================================================
 
 
 async def async_read_json(
     file_path: str | Path,
     encoding: str = "utf-8",
-    default: Any = None,
-) -> Any:
+) -> dict[str, Any] | list[Any] | None:
     """异步读取 JSON 文件。
 
     Args:
         file_path: JSON 文件路径
         encoding: 文件编码
-        default: 读取失败时返回的默认值
 
     Returns:
-        解析后的 JSON 数据,失败时返回 default
+        dict | list | None: 成功时包含解析后的 JSON 数据，失败返回 None
     """
     try:
         file_path = Path(file_path)
         if not file_path.exists():
-            logger.warning(f"JSON file not found: {file_path}")
-            return default
+            logger.error(f"File not found: {file_path}")
+            return None
 
         async with aiofiles.open(file_path, encoding=encoding) as f:
             content = await f.read()
             data = json.loads(content)
-            logger.debug(f"Successfully read JSON from: {file_path}")
+            logger.debug(f"Async read JSON from: {file_path}")
             return data
-
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error in {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return default
+        return None
     except Exception as e:
         logger.error(f"Failed to read JSON file {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return default
+        return None
 
 
 async def async_write_json(
@@ -270,7 +299,7 @@ async def async_write_json(
     indent: int = 2,
     ensure_ascii: bool = False,
     create_dirs: bool = True,
-) -> bool:
+) -> int | None:
     """异步写入 JSON 文件。
 
     Args:
@@ -282,7 +311,7 @@ async def async_write_json(
         create_dirs: 是否自动创建父目录
 
     Returns:
-        写入成功返回 True,失败返回 False
+        int | None: 成功时返回写入的字节数，失败返回 None
     """
     try:
         file_path = Path(file_path)
@@ -290,17 +319,94 @@ async def async_write_json(
         if create_dirs:
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        content = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
-        async with aiofiles.open(file_path, "w", encoding=encoding) as f:
-            await f.write(content)
-            logger.debug(f"Successfully wrote JSON to: {file_path}")
-            return True
+        json_str = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
 
+        async with aiofiles.open(file_path, "w", encoding=encoding) as f:
+            await f.write(json_str)
+
+        logger.debug(f"Async wrote JSON to: {file_path}")
+        return len(json_str.encode(encoding))
     except TypeError as e:
-        logger.error(f"Data is not JSON serializable: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return False
+        logger.error(f"JSON serialization error: {e}")
+        return None
     except Exception as e:
         logger.error(f"Failed to write JSON file {file_path}: {e}")
-        logger.debug(f"Traceback:\n{traceback.format_exc()}")
-        return False
+        return None
+
+
+async def async_merge_json_files(
+    file_paths: list[str | Path],
+    output_path: str | Path | None = None,
+) -> dict[str, Any] | None:
+    """异步合并多个 JSON 文件。
+
+    Args:
+        file_paths: JSON 文件路径列表
+        output_path: 输出文件路径(可选)
+
+    Returns:
+        dict | None: 成功时返回合并后的字典，失败返回 None
+    """
+    merged: dict[str, Any] = {}
+
+    for path in file_paths:
+        data = await async_read_json(path)
+        if data is None:
+            logger.error(f"Failed to read {path}")
+            return None
+
+        if isinstance(data, dict):
+            merged.update(data)
+        else:
+            logger.warning(f"Skipping non-dict JSON file: {path}")
+
+    if output_path:
+        bytes_written = await async_write_json(merged, output_path)
+        if bytes_written is None:
+            logger.error(f"Failed to write merged JSON to {output_path}")
+            return None
+
+    return merged
+
+
+async def async_load_json_batch(
+    file_paths: list[str | Path],
+    max_concurrency: int = 5,
+) -> list[dict[str, Any] | list[Any] | None]:
+    """并发异步加载多个 JSON 文件。
+
+    Args:
+        file_paths: JSON 文件路径列表
+        max_concurrency: 最大并发数
+
+    Returns:
+        各文件加载结果列表 (成功返回数据，失败返回 None)
+    """
+    semaphore = asyncio.Semaphore(max_concurrency)
+
+    async def load_with_semaphore(
+        path: str | Path,
+    ) -> dict[str, Any] | list[Any] | None:
+        async with semaphore:
+            return await async_read_json(path)
+
+    tasks = [load_with_semaphore(path) for path in file_paths]
+    return await asyncio.gather(*tasks)
+
+
+__all__ = [
+    # 同步操作
+    "read_json",
+    "write_json",
+    "safe_json_loads",
+    "safe_json_dumps",
+    "merge_json_files",
+    "pretty_print_json",
+    "validate_json_schema",
+    "json_path_get",
+    # 异步操作
+    "async_read_json",
+    "async_write_json",
+    "async_merge_json_files",
+    "async_load_json_batch",
+]

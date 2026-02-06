@@ -403,6 +403,32 @@ python scripts/update_version.py 0.2.0
 - [SDK 使用指南](doc/SDK_USAGE.md) - 工具函数使用示例  
 - [Pre-commit 指南](doc/PRE_COMMIT_GUIDE.md) - Git hooks 配置
 
+
+---
+
+## 🛣 路线图
+
+- [x] **Phase 1**: 基础框架与 pgvector 适配
+- [x] **Phase 2**: 自动化数据同步管道
+- [x] **Phase 3**: 智能聚类与 LLM 摘要增强
+- [x] **Phase 4**: 响应式 2D 可视化界面
+- [x] **Phase 5**: 前后端整合部署方案
+- [ ] **Phase 6**: 多用户/多账号支持
+- [ ] **Phase 7**: 技术栈演化报告生成
+
+---
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Tendo33/MyNebula&type=Date)](https://star-history.com/#Tendo33/MyNebula&Date)
+
+### Contributors
+
+<a href="https://github.com/Tendo33/MyNebula/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Tendo33/MyNebula" />
+</a>
+
+
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
