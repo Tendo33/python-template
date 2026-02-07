@@ -246,10 +246,9 @@ def list_files(
             logger.error(f"Directory not found: {dir_path}")
             return None
 
-        if recursive:
-            files = list(dir_path.rglob(pattern))
-        else:
-            files = list(dir_path.glob(pattern))
+        files = (
+            list(dir_path.rglob(pattern)) if recursive else list(dir_path.glob(pattern))
+        )
 
         files = [f for f in files if f.is_file()]
         logger.debug(f"Found {len(files)} files in {dir_path}")
