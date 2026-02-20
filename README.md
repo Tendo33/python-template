@@ -10,16 +10,6 @@
 - `mypy` 类型检查
 - `pytest` 测试与覆盖率
 
-## v0.2.0 Breaking Changes
-
-`python_template.utils` 顶层导出已收敛为稳定核心 API。
-
-旧写法需要迁移到子模块：
-- `from python_template.utils import retry_decorator` -> `from python_template.utils.decorator_utils import retry_decorator`
-- `from python_template.utils import chunk_list` -> `from python_template.utils.common_utils import chunk_list`
-- `from python_template.utils import Context` -> `from python_template.utils.context import Context`
-- `from python_template.utils import list_files` -> `from python_template.utils.file_utils import list_files`
-
 ## 快速开始
 
 ### 1) 安装依赖
