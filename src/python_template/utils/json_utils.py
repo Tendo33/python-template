@@ -9,6 +9,7 @@ from typing import Any
 import aiofiles
 
 from python_template.observability.log_config import get_logger
+from python_template.utils.decorator_utils import timing
 
 logger = get_logger(__name__)
 
@@ -18,6 +19,7 @@ logger = get_logger(__name__)
 # =============================================================================
 
 
+@timing
 def read_json(
     file_path: str | Path,
     encoding: str = "utf-8",
@@ -51,6 +53,7 @@ def read_json(
         return default
 
 
+@timing
 def write_json(
     data: Any,
     file_path: str | Path,
@@ -153,6 +156,7 @@ def safe_json_dumps(
         return fallback
 
 
+@timing
 def merge_json_files(
     file_paths: list[str | Path],
     output_path: str | Path | None = None,

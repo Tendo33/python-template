@@ -7,12 +7,15 @@ import asyncio
 import hashlib
 import re
 import shutil
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
+from typing import cast
 
 import aiofiles
 
 from python_template.observability.log_config import get_logger
+from python_template.utils.decorator_utils import timing
 
 logger = get_logger(__name__)
 
@@ -91,6 +94,7 @@ def format_file_size(size_bytes: int) -> str:
     return f"{s} {size_names[i]}"
 
 
+@timing
 def calculate_file_hash(
     file_path: str | Path,
     algorithm: str = "sha256",
@@ -128,6 +132,7 @@ def calculate_file_hash(
         return None
 
 
+@timing
 def copy_file(
     src: str | Path,
     dst: str | Path,
@@ -162,6 +167,7 @@ def copy_file(
         return None
 
 
+@timing
 def move_file(
     src: str | Path,
     dst: str | Path,
@@ -224,6 +230,7 @@ def delete_file(file_path: str | Path, missing_ok: bool = True) -> bool:
         return False
 
 
+@timing
 def list_files(
     directory: str | Path,
     pattern: str = "*",
@@ -566,7 +573,17 @@ async def async_list_files(
         list[Path] | None: 成功时返回文件列表，失败返回 None
     """
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, list_files, directory, pattern, recursive)
+    sync_list_files = cast(
+        Callable[[str | Path, str, bool], list[Path] | None],
+        list_files,
+    )
+    return await loop.run_in_executor(
+        None,
+        sync_list_files,
+        directory,
+        pattern,
+        recursive,
+    )
 
 
 __all__ = [

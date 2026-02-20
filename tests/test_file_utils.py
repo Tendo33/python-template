@@ -5,6 +5,7 @@
 
 from pathlib import Path
 
+from python_template.utils import decorator_utils
 from python_template.utils.file_utils import (
     calculate_file_hash,
     copy_file,
@@ -122,6 +123,17 @@ class TestCalculateFileHash:
         result = calculate_file_hash(temp_dir / "nonexistent.txt")
         assert result is None
 
+    def test_hash_logs_timing(self, temp_file: Path, monkeypatch) -> None:
+        """Test hash calculation emits timing log."""
+        debug_messages: list[str] = []
+
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        result = calculate_file_hash(temp_file)
+
+        assert result is not None
+        assert any("calculate_file_hash took" in message for message in debug_messages)
+
 
 # =============================================================================
 # copy_file / move_file 测试
@@ -147,6 +159,19 @@ class TestCopyMoveFile:
         assert result is not None
         assert dest.exists()
 
+    def test_copy_file_logs_timing(
+        self, temp_file: Path, temp_dir: Path, monkeypatch
+    ) -> None:
+        """Test copy emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        dest = temp_dir / "copy_with_timing.txt"
+        result = copy_file(temp_file, dest)
+
+        assert result is not None
+        assert any("copy_file took" in message for message in debug_messages)
+
     def test_move_file(self, temp_file: Path, temp_dir: Path) -> None:
         """Test moving file."""
         content = temp_file.read_text()
@@ -156,6 +181,19 @@ class TestCopyMoveFile:
         assert dest.exists()
         assert not temp_file.exists()  # Original no longer exists
         assert dest.read_text() == content
+
+    def test_move_file_logs_timing(
+        self, temp_file: Path, temp_dir: Path, monkeypatch
+    ) -> None:
+        """Test move emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        dest = temp_dir / "move_with_timing.txt"
+        result = move_file(temp_file, dest)
+
+        assert result is not None
+        assert any("move_file took" in message for message in debug_messages)
 
 
 # =============================================================================
@@ -229,6 +267,17 @@ class TestListFiles:
         result = list_files(temp_dir)
         assert result is not None
         assert result == []
+
+    def test_list_files_logs_timing(self, temp_dir: Path, monkeypatch) -> None:
+        """Test list_files emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        (temp_dir / "file1.txt").write_text("content1")
+        result = list_files(temp_dir)
+
+        assert result is not None
+        assert any("list_files took" in message for message in debug_messages)
 
 
 # =============================================================================

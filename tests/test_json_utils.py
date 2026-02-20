@@ -6,6 +6,7 @@
 import json
 from pathlib import Path
 
+from python_template.utils import decorator_utils
 from python_template.utils.json_utils import (
     merge_json_files,
     read_json,
@@ -43,6 +44,15 @@ class TestReadJson:
         invalid_file.write_text("{ invalid json }", encoding="utf-8")
         result = read_json(invalid_file)
         assert result is None
+
+    def test_read_json_logs_timing(self, temp_json_file: Path, monkeypatch) -> None:
+        """Test read_json emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        result = read_json(temp_json_file)
+        assert result is not None
+        assert any("read_json took" in message for message in debug_messages)
 
 
 class TestWriteJson:
@@ -87,6 +97,17 @@ class TestWriteJson:
         content = file_path.read_text()
         # Check indentation is present
         assert "    " in content
+
+    def test_write_json_logs_timing(self, temp_dir: Path, monkeypatch) -> None:
+        """Test write_json emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        file_path = temp_dir / "timing.json"
+        result = write_json({"key": "value"}, file_path)
+
+        assert result is True
+        assert any("write_json took" in message for message in debug_messages)
 
 
 class TestSafeJsonLoads:
@@ -216,6 +237,20 @@ class TestMergeJsonFiles:
 
         merged_content = json.loads(output.read_text())
         assert merged_content == {"a": 1, "b": 2}
+
+    def test_merge_json_files_logs_timing(self, temp_dir: Path, monkeypatch) -> None:
+        """Test merge emits timing log."""
+        debug_messages: list[str] = []
+        monkeypatch.setattr(decorator_utils.logger, "debug", debug_messages.append)
+
+        file1 = temp_dir / "file1.json"
+        file2 = temp_dir / "file2.json"
+        file1.write_text('{"a": 1}', encoding="utf-8")
+        file2.write_text('{"b": 2}', encoding="utf-8")
+
+        result = merge_json_files([file1, file2])
+        assert result == {"a": 1, "b": 2}
+        assert any("merge_json_files took" in message for message in debug_messages)
 
 
 class TestValidateJsonSchema:
