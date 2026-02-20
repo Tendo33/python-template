@@ -12,7 +12,7 @@ from pathlib import Path
 
 import aiofiles
 
-from .logger_util import get_logger
+from python_template.observability.log_config import get_logger
 
 logger = get_logger(__name__)
 

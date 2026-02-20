@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from python_template.utils.logger_util import (
+from python_template.observability.log_config import (
     configure_json_logging,
     get_default_logger,
     get_logger,

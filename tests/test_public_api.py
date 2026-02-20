@@ -56,6 +56,21 @@ def test_removed_symbol_remains_available_from_submodule() -> None:
     assert callable(retry_decorator)
 
 
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        "python_template.utils.setting",
+        "python_template.utils.context",
+        "python_template.utils.protocols",
+        "python_template.utils.logger_util",
+    ],
+)
+def test_removed_legacy_utils_modules_raise_import_error(module_name: str) -> None:
+    """Legacy utils module paths should be removed in the template."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module(module_name)
+
+
 def test_utils_wildcard_exports_only_core_symbols() -> None:
     """`python_template.utils.__all__` should be the constrained core surface."""
     expected = {

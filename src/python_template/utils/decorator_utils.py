@@ -10,7 +10,7 @@ import traceback
 from collections.abc import Callable, Coroutine
 from typing import Any, ParamSpec, TypeVar, cast
 
-from .logger_util import get_logger
+from python_template.observability.log_config import get_logger
 
 P = ParamSpec("P")
 R = TypeVar("R")

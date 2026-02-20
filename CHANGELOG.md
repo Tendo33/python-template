@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Breaking:** refactored module layout by moving `setting/context/protocols/logger_util` out of `utils` into `config/settings`, `core/context`, `contracts/protocols`, and `observability/log_config`; removed legacy import paths.
 - Simplified default app configuration: removed `APP_NAME`/`APP_VERSION` and kept only `ENVIRONMENT` (dropped `DEBUG`) from baseline runtime mode env vars.
 - Unified retry implementation by reusing `decorator_utils` retry internals from `common_utils`.
 - Removed `Settings/get_settings/reload_settings` re-exports from `common_utils` to reduce cross-module coupling.

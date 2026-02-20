@@ -10,7 +10,7 @@ Features / 特性:
 - Easy to extend / 易于扩展
 
 Usage / 使用方法:
-    from python_template.utils.setting import get_settings
+    from python_template.config.settings import get_settings
 
     settings = get_settings()
     print(settings.environment)
@@ -106,9 +106,9 @@ class Settings(BaseSettings):
         Returns:
             Path to project root / 项目根目录路径
         """
-        # Assuming this file is in src/{package}/utils/
+        # Assuming this file is in src/{package}/config/
         current_file = Path(__file__).resolve()
-        # Go up: setting.py -> utils -> package -> src -> project_root
+        # Go up: settings.py -> config -> package -> src -> project_root
         return current_file.parent.parent.parent.parent
 
     def get_log_file_path(self) -> Path:
@@ -134,7 +134,7 @@ def get_settings() -> Settings:
         Settings instance / 配置实例
 
     Example:
-        >>> from python_template.utils.setting import get_settings
+        >>> from python_template.config.settings import get_settings
         >>> settings = get_settings()
         >>> print(settings.environment)
         development

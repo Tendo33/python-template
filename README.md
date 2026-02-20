@@ -97,19 +97,12 @@ python scripts/setup_pre_commit.py
 
 ## 导入约定
 
-### 顶层稳定 API（推荐）
+### Canonical 导入（推荐）
 
 ```python
-from python_template.utils import (
-    get_logger,
-    setup_logging,
-    get_settings,
-    read_json,
-    write_json,
-    read_text_file,
-    write_text_file,
-    get_timestamp,
-)
+from python_template.config.settings import get_settings
+from python_template.observability.log_config import get_logger, setup_logging
+from python_template.utils import read_json, read_text_file, write_json, write_text_file
 ```
 
 ### 高级能力请从子模块导入
@@ -117,7 +110,7 @@ from python_template.utils import (
 ```python
 from python_template.utils.decorator_utils import retry_decorator
 from python_template.utils.common_utils import chunk_list
-from python_template.utils.context import Context
+from python_template.core.context import Context
 ```
 
 ## 常用示例
@@ -125,7 +118,7 @@ from python_template.utils.context import Context
 ### 日志
 
 ```python
-from python_template.utils import get_logger, setup_logging
+from python_template.observability.log_config import get_logger, setup_logging
 
 setup_logging(level="INFO", log_file="logs/app.log")
 logger = get_logger(__name__)
@@ -135,7 +128,7 @@ logger.info("service started")
 ### 配置
 
 ```python
-from python_template.utils import get_settings
+from python_template.config.settings import get_settings
 
 settings = get_settings()
 print(settings.environment)
@@ -159,7 +152,11 @@ config = read_json("data/config.json", default={})
 ```text
 python-template/
 ├── src/python_template/
+│   ├── config/
+│   ├── contracts/
+│   ├── core/
 │   ├── models/
+│   ├── observability/
 │   └── utils/
 ├── tests/
 ├── scripts/
