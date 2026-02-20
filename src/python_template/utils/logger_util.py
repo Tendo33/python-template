@@ -125,45 +125,12 @@ def configure_json_logging(
         log_file: Path to log file
         extra_fields: Additional fields to include in JSON logs
     """
-    if extra_fields is None:
-        extra_fields = {}
-
-    # JSON格式化函数
-    def json_formatter(record: dict[str, Any]) -> str:
-        """Format log record as JSON."""
-        import json
-
-        # 基础字段
-        log_entry = {
-            "timestamp": record["time"].isoformat(),
-            "level": record["level"].name,
-            "logger": record["name"],
-            "module": record["module"],
-            "function": record["function"],
-            "line": record["line"],
-            "message": record["message"],
-        }
-
-        # 添加额外字段
-        log_entry.update(extra_fields)
-
-        # 如果有异常信息，添加异常详情
-        if record.get("exception"):
-            log_entry["exception"] = {
-                "type": record["exception"].type.__name__,
-                "value": str(record["exception"].value),
-                "traceback": record["exception"].traceback,
-            }
-
-        return json.dumps(log_entry, ensure_ascii=False)
-
-    # 重新配置日志
     setup_logging(
         level=level,
-        format_string=json_formatter,
         log_file=log_file,
         serialize=True,
     )
+    logger.configure(extra=extra_fields or {})
 
 
 def log_function_calls(func):

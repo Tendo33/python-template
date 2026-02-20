@@ -213,5 +213,4 @@ __all__ = [
     "async_write_json",
     "async_merge_json_files",
     "async_load_json_batch",
-    "get_time_difference",
 ]

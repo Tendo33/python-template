@@ -38,13 +38,16 @@ git checkout -b feature/your-feature-name
 
 ```bash
 # 格式化代码
-uv run ruff format
+uv run ruff format src tests scripts
 
 # 检查代码
-uv run ruff check
+uv run ruff check src tests scripts
 
 # 自动修复问题
-uv run ruff check --fix
+uv run ruff check src tests scripts --fix
+
+# 类型检查
+uv run mypy src
 ```
 
 ### 类型提示

@@ -5,6 +5,8 @@
 
 from typing import Any
 
+import pytest
+
 from python_template.utils import (
     batch_process,
     chunk_list,
@@ -59,6 +61,12 @@ class TestChunkList:
         """Test chunking empty list."""
         chunks = list(chunk_list([], 5))
         assert chunks == []
+
+    def test_chunk_size_must_be_positive(self) -> None:
+        """Test chunk size validation."""
+        for invalid_size in (0, -1):
+            with pytest.raises(ValueError, match="chunk_size must be greater than 0"):
+                list(chunk_list([1, 2, 3], invalid_size))
 
 
 # =============================================================================

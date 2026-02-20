@@ -39,6 +39,7 @@ dev = [
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
     "pre-commit>=3.0.0",
+    "mypy>=1.15.0",
     "vulture>=2.10",
 ]
 test = [
@@ -64,6 +65,10 @@ Changelog = "https://github.com/Tendo33/python-template/blob/main/CHANGELOG.md"
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
+    ".agent",
+    ".claude",
+    ".codex",
+    ".cursor",
     ".direnv",
     ".eggs",
     ".git",
@@ -149,6 +154,15 @@ docstring-code-line-length = "dynamic"
 [tool.ruff.lint.isort]
 known-first-party = ["python_template"]
 
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+mypy_path = "src"
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+disable_error_code = ["import-untyped"]
+
 # Pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -220,5 +234,6 @@ packages = ["src/python_template"]
 
 [dependency-groups]
 dev = [
+    "mypy>=1.15.0",
     "pre-commit>=3.5.0",
 ]

@@ -52,6 +52,120 @@ python scripts/setup_pre_commit.py
 uv run pytest
 ```
 
+## 🧭 模板使用教程（从 0 到可开发）
+
+如果你后面要把这个仓库当作模板反复使用，建议按下面流程走一遍。
+
+### 第 0 步：准备你的新项目目录
+
+```bash
+# 方式 1：直接复制模板
+git clone https://github.com/Tendo33/python-template.git my-new-project
+cd my-new-project
+
+# 方式 2：你也可以用自己的模板仓库地址
+# git clone <your-template-repo> my-new-project
+```
+
+### 第 1 步：安装依赖并确认基础环境
+
+```bash
+# 安装全部依赖（含开发工具）
+uv sync --all-extras
+
+# 验证 Python 工具链
+uv run ruff --version
+uv run pytest --version
+```
+
+### 第 2 步：重命名包名（建议第一时间做）
+
+模板默认包名是 `python_template`。如果不改，后续发布或多项目并行时会很容易混淆。
+
+```bash
+# 先预览，确认影响范围
+python scripts/rename_package.py my_new_project --dry-run
+
+# 确认后执行（会修改 src 目录、导入路径、文档等）
+python scripts/rename_package.py my_new_project
+```
+
+执行后建议马上做一次检查：
+
+```bash
+uv run ruff check src tests scripts
+uv run pytest
+```
+
+### 第 3 步：更新项目元信息（发布前必须）
+
+重点改这些位置：
+
+- `pyproject.toml`：`name`、`description`、`authors`、`urls`
+- `src/<your_package>/__init__.py`：`__version__`
+- `.env.example`：`APP_NAME`、`APP_VERSION`
+- `README.md`：项目名、安装方式、示例导入路径
+
+可用脚本统一更新版本号：
+
+```bash
+python scripts/update_version.py 0.1.0
+```
+
+### 第 4 步：配置运行环境
+
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 按需修改 .env（至少确认 APP_NAME / ENVIRONMENT / LOG_LEVEL）
+```
+
+如果你有额外配置，直接在 `src/<your_package>/utils/setting.py` 的 `Settings` 类里新增字段，并同步更新 `.env.example`。
+
+### 第 5 步：启用提交前质量门禁（强烈建议）
+
+```bash
+# 安装并启用 pre-commit
+python scripts/setup_pre_commit.py
+```
+
+这样每次 `git commit` 前都会自动执行格式化与静态检查，能提前挡住大多数低级问题。
+
+### 第 6 步：开始业务开发（推荐最小循环）
+
+每次做完一个小功能，至少跑下面四个命令：
+
+```bash
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
+uv run pytest
+```
+
+如果都通过，再提交代码。这样你的模板项目会一直保持“可运行、可测试、可发布”的状态。
+
+### 第 7 步：交付前最终检查清单
+
+在准备发布/交付前，建议再跑一次：
+
+```bash
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
+uv run pytest
+uv run python scripts/run_vulture.py --min-confidence 80
+```
+
+### 常见问题（高频）
+
+1. `import python_template` 报错  
+   - 先确认执行过 `uv sync --all-extras`，并在项目根目录运行命令。  
+2. 重命名后测试失败  
+   - 通常是有遗漏导入或缓存，先看 `git diff`，再重新跑 `uv run pytest`。  
+3. Ruff 扫到不该扫的目录  
+   - 本模板已在 `pyproject.toml` 排除 `.agent/.claude/.codex/.cursor`，如你新增目录可按同样方式加入排除。
+
 ---
 
 ## ✨ 特性
@@ -346,10 +460,13 @@ uv sync --all-extras
 
 ```bash
 # 格式化代码
-uv run ruff format
+uv run ruff format src tests scripts
 
 # 代码检查
-uv run ruff check
+uv run ruff check src tests scripts
+
+# 类型检查
+uv run mypy src
 ```
 
 ### 运行测试

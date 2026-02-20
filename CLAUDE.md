@@ -38,8 +38,9 @@ cat .claude/skills/backend-engineering-playbook/SKILL.md
 Run relevant checks before completion:
 
 ```bash
-uv run ruff check .
-uv run ruff format --check .
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
 uv run pytest
 npm --prefix frontend run lint
 npm --prefix frontend run typecheck

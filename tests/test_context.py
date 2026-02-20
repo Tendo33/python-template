@@ -246,6 +246,24 @@ class TestRunInContext:
         result = run_in_context(ctx, func, 21)
         assert result == 42
 
+    def test_run_in_context_uses_isolated_target_context(self) -> None:
+        """Test run_in_context uses the provided context without ambient globals."""
+        clear_global()
+        set_global("ambient_key", "ambient-value")
+
+        ctx = Context("isolated_run")
+        ctx.set("scoped_key", "scoped-value")
+
+        def func() -> tuple[str | None, str | None]:
+            return ctx.get("scoped_key"), get_global("ambient_key")
+
+        scoped_value, ambient_value = run_in_context(ctx, func)
+        assert scoped_value == "scoped-value"
+        assert ambient_value is None
+        assert get_global("ambient_key") == "ambient-value"
+
+        clear_global()
+
 
 # =============================================================================
 # async_context_scope 测试

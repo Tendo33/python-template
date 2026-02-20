@@ -163,6 +163,29 @@ class TestSafeJsonDumps:
         result = safe_json_dumps(Unserializable())
         assert result is None
 
+    def test_safe_json_dumps_with_serializer_default(self) -> None:
+        """Test preserving json.dumps default serializer support."""
+
+        class Unserializable:
+            def __init__(self, value: str) -> None:
+                self.value = value
+
+        result = safe_json_dumps(
+            Unserializable("ok"),
+            default=lambda obj: {"value": obj.value},
+            indent=None,
+        )
+        assert result == '{"value": "ok"}'
+
+    def test_safe_json_dumps_with_fallback(self) -> None:
+        """Test returning fallback value when serialization fails."""
+
+        class Unserializable:
+            pass
+
+        result = safe_json_dumps(Unserializable(), fallback="<serialization-failed>")
+        assert result == "<serialization-failed>"
+
 
 class TestMergeJsonFiles:
     """Tests for merge_json_files function."""

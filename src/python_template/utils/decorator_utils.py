@@ -8,7 +8,7 @@ import functools
 import time
 import traceback
 from collections.abc import Callable, Coroutine
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypeVar, cast
 
 from .logger_util import get_logger
 
@@ -33,8 +33,10 @@ def timing(
         func: The function to decorate
     """
     if asyncio.iscoroutinefunction(func):
-        return _async_timing_impl(func)
-    return _sync_timing_impl(func)
+        async_func = cast(Callable[P, Coroutine[Any, Any, R]], func)
+        return _async_timing_impl(async_func)
+    sync_func = cast(Callable[P, R], func)
+    return _sync_timing_impl(sync_func)
 
 
 def retry(
@@ -59,8 +61,12 @@ def retry(
         func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
     ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
         if asyncio.iscoroutinefunction(func):
-            return _async_retry_impl(func, max_retries, delay, backoff, exceptions)
-        return _sync_retry_impl(func, max_retries, delay, backoff, exceptions)
+            async_func = cast(Callable[P, Coroutine[Any, Any, R]], func)
+            return _async_retry_impl(
+                async_func, max_retries, delay, backoff, exceptions
+            )
+        sync_func = cast(Callable[P, R], func)
+        return _sync_retry_impl(sync_func, max_retries, delay, backoff, exceptions)
 
     return decorator
 
@@ -85,8 +91,10 @@ def catch_exceptions(
         func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
     ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
         if asyncio.iscoroutinefunction(func):
-            return _async_catch_impl(func, default_return, exceptions, reraise)
-        return _sync_catch_impl(func, default_return, exceptions, reraise)
+            async_func = cast(Callable[P, Coroutine[Any, Any, R]], func)
+            return _async_catch_impl(async_func, default_return, exceptions, reraise)
+        sync_func = cast(Callable[P, R], func)
+        return _sync_catch_impl(sync_func, default_return, exceptions, reraise)
 
     return decorator
 
@@ -111,8 +119,10 @@ def log_calls(
         func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
     ) -> Callable[P, R] | Callable[P, Coroutine[Any, Any, R]]:
         if asyncio.iscoroutinefunction(func):
-            return _async_log_calls_impl(func, level, log_args, log_result)
-        return _sync_log_calls_impl(func, level, log_args, log_result)
+            async_func = cast(Callable[P, Coroutine[Any, Any, R]], func)
+            return _async_log_calls_impl(async_func, level, log_args, log_result)
+        sync_func = cast(Callable[P, R], func)
+        return _sync_log_calls_impl(sync_func, level, log_args, log_result)
 
     return decorator
 
@@ -144,7 +154,7 @@ def _sync_retry_impl(
     @functools.wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         current_delay = delay
-        last_exception: Exception | None = None
+        last_exception: BaseException | None = None
 
         for attempt in range(max_retries + 1):
             try:
@@ -239,7 +249,7 @@ def _async_retry_impl(
     @functools.wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         current_delay = delay
-        last_exception: Exception | None = None
+        last_exception: BaseException | None = None
 
         for attempt in range(max_retries + 1):
             try:
@@ -381,7 +391,7 @@ class ContextTimer:
         self.start_time = time.perf_counter()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, _exc_type: Any, _exc_val: Any, _exc_tb: Any) -> None:
         end_time = time.perf_counter()
         self._elapsed_time = end_time - self.start_time
         logger.debug(f"{self.name} took {self._elapsed_time:.4f}s")
@@ -413,7 +423,7 @@ class AsyncContextTimer:
         self.start_time = time.perf_counter()
         return self
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(self, _exc_type: Any, _exc_val: Any, _exc_tb: Any) -> None:
         end_time = time.perf_counter()
         self._elapsed_time = end_time - self.start_time
         logger.debug(f"{self.name} took {self._elapsed_time:.4f}s")

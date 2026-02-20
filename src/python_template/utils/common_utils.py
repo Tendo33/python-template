@@ -32,6 +32,9 @@ def chunk_list(data: list[T], chunk_size: int) -> Generator[list[T], None, None]
     Yields:
         Chunks of the list
     """
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be greater than 0")
+
     for i in range(0, len(data), chunk_size):
         yield data[i : i + chunk_size]
 
@@ -185,20 +188,12 @@ def safe_set(data: dict[str, Any], path: str, value: Any, create: bool = True) -
 
 def remove_none_values(data: dict[str, Any], recursive: bool = True) -> dict[str, Any]:
     """Remove None values from dictionary."""
-    if not isinstance(data, dict):
-        return data
-
-    result = {}
+    result: dict[str, Any] = {}
     for k, v in data.items():
         if v is None:
             continue
         if recursive and isinstance(v, dict):
-            clean_v = remove_none_values(v, recursive=True)
-            if clean_v:  # Only keep if not empty after cleaning?
-                # Actually typically we just remove None, not empty dicts
-                result[k] = clean_v
-            else:
-                result[k] = clean_v
+            result[k] = remove_none_values(v, recursive=True)
         else:
             result[k] = v
     return result

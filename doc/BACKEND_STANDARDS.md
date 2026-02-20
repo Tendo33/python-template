@@ -82,7 +82,8 @@ A backend task is complete only if:
 Recommended checks:
 
 ```bash
-uv run ruff check .
-uv run ruff format --check .
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
 uv run pytest
 ```

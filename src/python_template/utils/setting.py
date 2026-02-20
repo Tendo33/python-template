@@ -162,4 +162,6 @@ def reload_settings(env_file: Path | None = None) -> Settings:
         New Settings instance / 新的配置实例
     """
     get_settings.cache_clear()
-    return get_settings() if env_file is None else Settings(_env_file=str(env_file))
+    if env_file is None:
+        return get_settings()
+    return Settings(_env_file=str(env_file))  # type: ignore[call-arg]

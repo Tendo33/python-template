@@ -434,7 +434,7 @@ async def async_copy_file(
             dst_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 使用线程池执行阻塞操作
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, shutil.copy2, str(src_path), str(dst_path))
 
         logger.info(f"Async copied file: {src_path} -> {dst_path}")
@@ -470,7 +470,7 @@ async def async_move_file(
         if create_dirs:
             dst_path.parent.mkdir(parents=True, exist_ok=True)
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, shutil.move, str(src_path), str(dst_path))
 
         logger.info(f"Async moved file: {src_path} -> {dst_path}")
@@ -503,7 +503,7 @@ async def async_delete_file(
             logger.error(f"File not found: {file_path}")
             return False
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, file_path.unlink)
 
         logger.info(f"Async deleted file: {file_path}")
@@ -565,7 +565,7 @@ async def async_list_files(
     Returns:
         list[Path] | None: 成功时返回文件列表，失败返回 None
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, list_files, directory, pattern, recursive)
 
 

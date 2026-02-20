@@ -34,8 +34,9 @@ If a backend API/service is needed and no framework is specified, default to:
 Recommended verification sequence:
 
 ```bash
-uv run ruff check .
-uv run ruff format --check .
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
 uv run pytest
 ```
 

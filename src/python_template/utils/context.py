@@ -9,7 +9,8 @@ management with proper isolation between async tasks.
 
 from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager, contextmanager
-from contextvars import ContextVar, copy_context
+from contextvars import Context as ContextRunner
+from contextvars import ContextVar
 from typing import Any, TypeVar
 
 T = TypeVar("T")
@@ -58,16 +59,11 @@ class Context:
 
     def _get_data(self) -> dict[str, Any]:
         """获取当前上下文数据。"""
-        try:
-            data = self._data.get()
-            if data is None:
-                data = {}
-                self._data.set(data)
-            return data
-        except LookupError:
-            data: dict[str, Any] = {}
+        data = self._data.get()
+        if data is None:
+            data = {}
             self._data.set(data)
-            return data
+        return data
 
     def set(self, key: str, value: Any) -> None:
         """Set a value in the context.
@@ -453,8 +449,10 @@ def run_in_context(ctx: Context, func: Any, *args: Any, **kwargs: Any) -> Any:
     Returns:
         Function result
     """
-    context = copy_context()
-    return context.run(func, *args, **kwargs)
+    data_snapshot = ctx.to_dict()
+    execution_context = ContextRunner()
+    execution_context.run(ctx._data.set, data_snapshot)
+    return execution_context.run(func, *args, **kwargs)
 
 
 # Convenience functions / 便捷函数

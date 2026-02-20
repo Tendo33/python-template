@@ -102,9 +102,7 @@ class VersionUpdater:
 
         return match.group(1)
 
-    def update_file(
-        self, target: VersionTarget, new_version: str
-    ) -> tuple[str, str]:
+    def update_file(self, target: VersionTarget, new_version: str) -> tuple[str, str]:
         """Update version in a single file.
 
         更新单个文件中的版本。
@@ -133,7 +131,10 @@ class VersionUpdater:
             match = re.search(pattern, content, re.MULTILINE)
             if not match:
                 if target.optional:
-                    return "SKIP", f"Version pattern not found in optional file: {file_path}"
+                    return (
+                        "SKIP",
+                        f"Version pattern not found in optional file: {file_path}",
+                    )
                 return "ERROR", f"Version pattern not found in {file_path}"
 
             old_version = match.group(1)
@@ -195,7 +196,9 @@ class VersionUpdater:
                     # Write the updated content
                     content = target.path.read_text(encoding="utf-8")
                     new_line = target.replacement.format(version=new_version)
-                    content = re.sub(target.pattern, new_line, content, flags=re.MULTILINE)
+                    content = re.sub(
+                        target.pattern, new_line, content, flags=re.MULTILINE
+                    )
                     target.path.write_text(content, encoding="utf-8")
                     messages.append(f"[OK] {message}")
                 else:

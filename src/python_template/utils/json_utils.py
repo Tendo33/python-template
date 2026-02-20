@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -117,8 +118,9 @@ def safe_json_loads(json_str: str, default: Any = None) -> Any:
 
 def safe_json_dumps(
     obj: Any,
-    default: Any = None,
-    indent: int = 2,
+    default: Callable[[Any], Any] | None = None,
+    indent: int | None = 2,
+    fallback: str | None = None,
     ensure_ascii: bool = False,
     **kwargs: Any,
 ) -> str | None:
@@ -126,8 +128,9 @@ def safe_json_dumps(
 
     Args:
         obj: 要序列化的对象
-        default: 序列化失败时的默认值 (如果提供)
+        default: 传递给 json.dumps 的默认序列化函数
         indent: 缩进
+        fallback: 序列化失败时返回的回退值
         ensure_ascii: 是否确保 ASCII
         **kwargs: 传递给 json.dumps 的其他参数
 
@@ -144,10 +147,10 @@ def safe_json_dumps(
         )
     except TypeError as e:
         logger.error(f"JSON serialization error: {e}")
-        return None
+        return fallback
     except Exception as e:
         logger.error(f"Failed to serialize JSON: {e}")
-        return None
+        return fallback
 
 
 def merge_json_files(
