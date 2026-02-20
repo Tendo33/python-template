@@ -304,7 +304,7 @@ async def async_write_json(
     indent: int = 2,
     ensure_ascii: bool = False,
     create_dirs: bool = True,
-) -> int | None:
+) -> bool:
     """异步写入 JSON 文件。
 
     Args:
@@ -316,7 +316,7 @@ async def async_write_json(
         create_dirs: 是否自动创建父目录
 
     Returns:
-        int | None: 成功时返回写入的字节数，失败返回 None
+        bool: 成功返回 True，失败返回 False
     """
     try:
         file_path = Path(file_path)
@@ -330,13 +330,13 @@ async def async_write_json(
             await f.write(json_str)
 
         logger.debug(f"Async wrote JSON to: {file_path}")
-        return len(json_str.encode(encoding))
+        return True
     except TypeError as e:
         logger.error(f"JSON serialization error: {e}")
-        return None
+        return False
     except Exception as e:
         logger.error(f"Failed to write JSON file {file_path}: {e}")
-        return None
+        return False
 
 
 async def async_merge_json_files(
@@ -366,8 +366,8 @@ async def async_merge_json_files(
             logger.warning(f"Skipping non-dict JSON file: {path}")
 
     if output_path:
-        bytes_written = await async_write_json(merged, output_path)
-        if bytes_written is None:
+        write_ok = await async_write_json(merged, output_path)
+        if not write_ok:
             logger.error(f"Failed to write merged JSON to {output_path}")
             return None
 

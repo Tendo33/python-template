@@ -20,6 +20,7 @@ from python_template.utils.common_utils import (
     merge_dicts,
     remove_empty_values,
     remove_none_values,
+    retry_on_exception,
     safe_get,
     safe_set,
     unflatten_dict,
@@ -380,3 +381,37 @@ class TestValidateEmail:
         assert validate_email("@example.com") is False
         assert validate_email("test@") is False
         assert validate_email("") is False
+
+
+class TestRetryOnException:
+    """Tests for retry_on_exception function."""
+
+    def test_retry_eventual_success(self) -> None:
+        """Retry should return result when a later attempt succeeds."""
+        attempts = 0
+
+        def flaky() -> str:
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise ValueError("not yet")
+            return "ok"
+
+        result = retry_on_exception(flaky, max_retries=3, delay=0)
+        assert result == "ok"
+        assert attempts == 3
+
+    def test_retry_raises_after_all_failures(self) -> None:
+        """Retry should raise when all attempts fail."""
+
+        def always_fail() -> str:
+            raise RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            retry_on_exception(always_fail, max_retries=2, delay=0)
+
+
+def test_common_utils_does_not_reexport_settings_api() -> None:
+    """common_utils should not re-export Settings accessors."""
+    with pytest.raises(ImportError):
+        exec("from python_template.utils.common_utils import get_settings")

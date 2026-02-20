@@ -133,11 +133,23 @@ class TestAsyncJsonUtils:
 
         # Write
         write_result = await async_write_json(data, test_file)
-        assert write_result is not None
+        assert write_result is True
 
         # Read
         read_result = await async_read_json(test_file)
         assert read_result == data
+
+    async def test_async_write_json_returns_false_on_serialize_error(
+        self, async_temp_dir: Path
+    ) -> None:
+        """Test async write JSON returns False when serialization fails."""
+        test_file = async_temp_dir / "bad.json"
+
+        class Unserializable:
+            pass
+
+        result = await async_write_json(Unserializable(), test_file)
+        assert result is False
 
     async def test_async_merge_json_files(self, async_temp_dir: Path) -> None:
         """Test async merging JSON files."""

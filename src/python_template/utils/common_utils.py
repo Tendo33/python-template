@@ -4,12 +4,11 @@ Provides shared utilities for list/dict operations, processing, and more.
 """
 
 import asyncio
-import time
 from collections.abc import Callable, Coroutine, Generator
 from typing import Any, TypeVar
 
+from .decorator_utils import _async_retry_impl, _sync_retry_impl
 from .logger_util import get_logger
-from .setting import Settings, get_settings, reload_settings
 
 logger = get_logger(__name__)
 
@@ -290,23 +289,14 @@ def retry_on_exception(
     **kwargs: Any,
 ) -> R:
     """Retry function on exception."""
-    last_exception: Exception | None = None
-    for attempt in range(max_retries + 1):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            last_exception = e
-            if attempt < max_retries:
-                logger.warning(
-                    f"Attempt {attempt + 1}/{max_retries + 1} failed: {e}. Retrying in {delay}s"
-                )
-                time.sleep(delay)
-            else:
-                logger.error(f"All {max_retries + 1} attempts failed")
-
-    if last_exception:
-        raise last_exception
-    raise RuntimeError("Unexpected state")
+    wrapped = _sync_retry_impl(
+        func=func,
+        max_retries=max_retries,
+        delay=delay,
+        backoff=1.0,
+        exceptions=(Exception,),
+    )
+    return wrapped(*args, **kwargs)
 
 
 async def async_retry_on_exception(
@@ -317,23 +307,14 @@ async def async_retry_on_exception(
     **kwargs: Any,
 ) -> R:
     """Async retry function on exception."""
-    last_exception: Exception | None = None
-    for attempt in range(max_retries + 1):
-        try:
-            return await func(*args, **kwargs)
-        except Exception as e:
-            last_exception = e
-            if attempt < max_retries:
-                logger.warning(
-                    f"Async attempt {attempt + 1}/{max_retries + 1} failed: {e}. Retrying in {delay}s"
-                )
-                await asyncio.sleep(delay)
-            else:
-                logger.error(f"All {max_retries + 1} calls failed")
-
-    if last_exception:
-        raise last_exception
-    raise RuntimeError("Unexpected state")
+    wrapped = _async_retry_impl(
+        func=func,
+        max_retries=max_retries,
+        delay=delay,
+        backoff=1.0,
+        exceptions=(Exception,),
+    )
+    return await wrapped(*args, **kwargs)
 
 
 # =============================================================================
@@ -382,7 +363,4 @@ __all__ = [
     "ensure_list",
     "first_non_none",
     "validate_email",
-    "Settings",
-    "get_settings",
-    "reload_settings",
 ]

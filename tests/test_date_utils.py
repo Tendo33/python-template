@@ -3,8 +3,9 @@
 测试日期时间工具函数模块。
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
+import python_template.utils.date_utils as date_utils_module
 from python_template.utils.date_utils import (
     add_days,
     add_hours,
@@ -99,6 +100,34 @@ class TestCurrentDateTime:
         assert len(result) == 8
         assert result[2] == ":"
         assert result[5] == ":"
+
+    def test_get_current_date_defaults_to_utc(self, monkeypatch) -> None:
+        """Default current date should be produced from UTC now()."""
+
+        class FixedDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):  # noqa: ANN001
+                if tz is timezone.utc:
+                    return cls(2026, 2, 20, 0, 30, 0, tzinfo=timezone.utc)
+                return cls(2026, 2, 19, 16, 30, 0)
+
+        monkeypatch.setattr(date_utils_module, "datetime", FixedDateTime)
+        assert get_current_date() == "2026-02-20"
+        assert get_current_date(use_utc=False) == "2026-02-19"
+
+    def test_get_current_time_defaults_to_utc(self, monkeypatch) -> None:
+        """Default current time should be produced from UTC now()."""
+
+        class FixedDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):  # noqa: ANN001
+                if tz is timezone.utc:
+                    return cls(2026, 2, 20, 0, 30, 1, tzinfo=timezone.utc)
+                return cls(2026, 2, 19, 16, 30, 2)
+
+        monkeypatch.setattr(date_utils_module, "datetime", FixedDateTime)
+        assert get_current_time() == "00:30:01"
+        assert get_current_time(use_utc=False) == "16:30:02"
 
 
 class TestAddTime:

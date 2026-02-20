@@ -10,6 +10,13 @@
 - `mypy` 类型检查
 - `pytest` 测试与覆盖率
 
+内置内容聚焦在“开箱可用的基础工程能力”：
+- 配置管理（`pydantic-settings`）
+- 日志（`loguru`）
+- 文件 / JSON / 日期时间工具
+- 装饰器、上下文、通用工具函数
+- 可直接发布的打包与 CI 质量门禁
+
 ## 快速开始
 
 ### 1) 安装依赖
@@ -39,6 +46,53 @@ uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 uv run mypy src
 uv run pytest
+```
+
+## 用这个 Template 创建新项目
+
+### 1) 复制模板仓库
+
+```bash
+git clone https://github.com/Tendo33/python-template.git my-new-project
+cd my-new-project
+```
+
+### 2) 重命名包名（建议第一步就做）
+
+```bash
+# 先预览
+python scripts/rename_package.py my_new_project --dry-run
+
+# 再执行
+python scripts/rename_package.py my_new_project
+```
+
+### 3) 更新项目信息
+
+建议至少更新：
+- `pyproject.toml`：`name`、`description`、`authors`、`urls`
+- `src/<your_package>/__init__.py`：`__version__`
+- `README.md`：项目名与示例导入路径
+
+如需统一改版本号：
+
+```bash
+python scripts/update_version.py 0.2.0
+```
+
+### 4) 验证模板改名后可用
+
+```bash
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
+uv run pytest
+```
+
+### 5) （可选）启用提交前检查
+
+```bash
+python scripts/setup_pre_commit.py
 ```
 
 ## 导入约定

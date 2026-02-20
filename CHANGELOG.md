@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Simplified default app configuration: removed `APP_NAME`/`APP_VERSION` and kept only `ENVIRONMENT` (dropped `DEBUG`) from baseline runtime mode env vars.
+- Unified retry implementation by reusing `decorator_utils` retry internals from `common_utils`.
+- Removed `Settings/get_settings/reload_settings` re-exports from `common_utils` to reduce cross-module coupling.
+- Unified JSON write contracts so `write_json` and `async_write_json` both return `bool`.
+- Unified current date/time defaults to UTC in `date_utils` (`get_current_date`/`get_current_time`), with `use_utc=False` for local time.
 
 ## [0.2.0] - 2026-02-20
 

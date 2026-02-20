@@ -85,28 +85,38 @@ def parse_datetime(
         return None
 
 
-def get_current_date(format_str: str = "%Y-%m-%d") -> str:
+def get_current_date(
+    format_str: str = "%Y-%m-%d",
+    use_utc: bool = True,
+) -> str:
     """获取当前日期。
 
     Args:
         format_str: 格式化字符串
+        use_utc: 是否使用 UTC 时间
 
     Returns:
         格式化后的日期字符串
     """
-    return datetime.now().strftime(format_str)
+    now = datetime.now(timezone.utc) if use_utc else datetime.now()
+    return now.strftime(format_str)
 
 
-def get_current_time(format_str: str = "%H:%M:%S") -> str:
+def get_current_time(
+    format_str: str = "%H:%M:%S",
+    use_utc: bool = True,
+) -> str:
     """获取当前时间。
 
     Args:
         format_str: 格式化字符串
+        use_utc: 是否使用 UTC 时间
 
     Returns:
         格式化后的时间字符串
     """
-    return datetime.now().strftime(format_str)
+    now = datetime.now(timezone.utc) if use_utc else datetime.now()
+    return now.strftime(format_str)
 
 
 def get_time_difference(
