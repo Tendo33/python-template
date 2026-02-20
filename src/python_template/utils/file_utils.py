@@ -261,21 +261,23 @@ def list_files(
 def read_text_file(
     file_path: str | Path,
     encoding: str = "utf-8",
+    default: str | None = None,
 ) -> str | None:
     """读取文本文件。
 
     Args:
         file_path: 文件路径
         encoding: 文件编码
+        default: 读取失败时返回的默认值
 
     Returns:
-        str | None: 成功时返回文件内容，失败返回 None
+        str | None: 成功时返回文件内容，失败返回 default
     """
     try:
         file_path = Path(file_path)
         if not file_path.exists():
             logger.error(f"File not found: {file_path}")
-            return None
+            return default
 
         with open(file_path, encoding=encoding) as f:
             content = f.read()
@@ -283,7 +285,7 @@ def read_text_file(
             return content
     except Exception as e:
         logger.error(f"Failed to read file {file_path}: {e}")
-        return None
+        return default
 
 
 def write_text_file(

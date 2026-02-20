@@ -7,7 +7,7 @@
 ### 1. Fork 并克隆项目
 
 ```bash
-git clone https://github.com/yourusername/python-template.git
+git clone https://github.com/Tendo33/python-template.git
 cd python-template
 ```
 
@@ -146,7 +146,7 @@ uv run pytest
 
 ### 报告 Bug
 
-如果你发现了 bug，请创建一个 [Issue](https://github.com/yourusername/python-template/issues)，包含：
+如果你发现了 bug，请创建一个 [Issue](https://github.com/Tendo33/python-template/issues)，包含：
 
 - 问题描述
 - 复现步骤
@@ -178,8 +178,7 @@ uv run pytest
 
 如有任何问题，请通过以下方式联系：
 
-- 创建 [Issue](https://github.com/yourusername/python-template/issues)
-- 发送邮件至 your.email@example.com
+- 创建 [Issue](https://github.com/Tendo33/python-template/issues)
 
 ---
 

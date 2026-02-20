@@ -20,21 +20,23 @@ logger = get_logger(__name__)
 def read_json(
     file_path: str | Path,
     encoding: str = "utf-8",
+    default: dict[str, Any] | list[Any] | None = None,
 ) -> dict[str, Any] | list[Any] | None:
     """读取 JSON 文件。
 
     Args:
         file_path: JSON 文件路径
         encoding: 文件编码
+        default: 读取失败时返回的默认值
 
     Returns:
-        dict | list | None: 成功时返回解析后的 JSON 数据，失败返回 None
+        dict | list | None: 成功时返回解析后的 JSON 数据，失败返回 default
     """
     try:
         file_path = Path(file_path)
         if not file_path.exists():
             logger.error(f"File not found: {file_path}")
-            return None
+            return default
 
         with open(file_path, encoding=encoding) as f:
             data = json.load(f)
@@ -42,10 +44,10 @@ def read_json(
             return data
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error in {file_path}: {e}")
-        return None
+        return default
     except Exception as e:
         logger.error(f"Failed to read JSON file {file_path}: {e}")
-        return None
+        return default
 
 
 def write_json(

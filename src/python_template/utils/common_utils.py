@@ -9,6 +9,7 @@ from collections.abc import Callable, Coroutine, Generator
 from typing import Any, TypeVar
 
 from .logger_util import get_logger
+from .setting import Settings, get_settings, reload_settings
 
 logger = get_logger(__name__)
 
@@ -363,19 +364,6 @@ def validate_email(email: str) -> bool:
 
     EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
     return bool(EMAIL_PATTERN.match(email))
-
-
-# Placeholder for settings (implementation depends on pydantic-settings)
-class Settings:
-    pass
-
-
-def get_settings():
-    pass
-
-
-def reload_settings():
-    pass
 
 
 __all__ = [

@@ -130,7 +130,7 @@ def example_list_operations():
     """列表操作示例。"""
     # 分块处理
     data = list(range(10))
-    chunks = utils.chunk_list(data, 3)
+    chunks = list(utils.chunk_list(data, 3))
     print(f"分块结果: {chunks}")
 
     # 批量处理

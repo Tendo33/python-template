@@ -89,8 +89,8 @@ pythonpath = ["src"]
 ### 3.2 File Path (文件路径)
 *   **定义**：程序读取数据、保存日志、写入文件时使用的路径。
 *   **基准**：相对路径通常是相对于 **当前工作目录 (Current Working Directory, CWD)** 的。
-    *   如果你在项目根目录运行 `python tests/test_data.py`，那么 CWD 就是根目录。
-    *   如果你进入 `tests` 目录运行 `python test_data.py`，那么 CWD 就是 `tests` 目录。
+    *   如果你在项目根目录运行 `python tests/test_data_loading.py`，那么 CWD 就是根目录。
+    *   如果你进入 `tests` 目录运行 `python test_data_loading.py`，那么 CWD 就是 `tests` 目录。
 *   **结论**：即使 `pythonpath` 设置为 `src`，日志文件（如 `logs/app.log`）和数据文件（如 `data/test.json`）的保存位置，依然取决于你 **在哪里运行命令**，而不是 `src` 在哪里。
 
 **最佳实践**：

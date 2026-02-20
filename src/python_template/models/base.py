@@ -4,10 +4,11 @@ Provides common configurations and reusable mixins for all Pydantic models.
 为所有Pydantic模型提供通用配置和可复用的Mixin。
 """
 
+from datetime import datetime, timezone
 from typing import Any
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 
 
 class BaseModel(PydanticBaseModel):
@@ -46,3 +47,16 @@ class BaseModel(PydanticBaseModel):
             Dictionary with JSON-serializable values
         """
         return self.model_dump(mode="json")
+
+
+class TimestampMixin(BaseModel):
+    """Mixin that provides UTC timestamps for created/updated times."""
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Creation timestamp in UTC",
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Last update timestamp in UTC",
+    )

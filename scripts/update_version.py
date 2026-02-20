@@ -4,7 +4,7 @@
 This script updates the version number across all relevant files in the project:
 - pyproject.toml
 - src/python_template/__init__.py
-- config.example.toml
+- .env.example (APP_VERSION)
 
 该脚本用于更新项目中所有相关文件的版本号。
 
@@ -19,7 +19,18 @@ Examples:
 import argparse
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+
+
+@dataclass(frozen=True)
+class VersionTarget:
+    """Configuration for a file version replacement target."""
+
+    path: Path
+    pattern: str
+    replacement: str
+    optional: bool = False
 
 
 class VersionUpdater:
@@ -38,20 +49,21 @@ class VersionUpdater:
         """
         self.project_root = project_root
         self.files_to_update = [
-            (
-                project_root / "pyproject.toml",
-                r'^version = "([^"]+)"',
-                'version = "{version}"',
+            VersionTarget(
+                path=project_root / "pyproject.toml",
+                pattern=r'^version = "([^"]+)"',
+                replacement='version = "{version}"',
             ),
-            (
-                project_root / "src" / "python_template" / "__init__.py",
-                r'^__version__ = "([^"]+)"',
-                '__version__ = "{version}"',
+            VersionTarget(
+                path=project_root / "src" / "python_template" / "__init__.py",
+                pattern=r'^__version__ = "([^"]+)"',
+                replacement='__version__ = "{version}"',
             ),
-            (
-                project_root / "config.example.toml",
-                r'^version = "([^"]+)"',
-                'version = "{version}"',
+            VersionTarget(
+                path=project_root / ".env.example",
+                pattern=r"^APP_VERSION=(.+)$",
+                replacement="APP_VERSION={version}",
+                optional=True,
             ),
         ]
 
@@ -91,23 +103,27 @@ class VersionUpdater:
         return match.group(1)
 
     def update_file(
-        self, file_path: Path, pattern: str, replacement: str, new_version: str
-    ) -> tuple[bool, str]:
+        self, target: VersionTarget, new_version: str
+    ) -> tuple[str, str]:
         """Update version in a single file.
 
         更新单个文件中的版本。
 
         Args:
-            file_path: Path to file to update
-            pattern: Regex pattern to find version
-            replacement: Replacement template with {version} placeholder
+            target: Version target configuration
             new_version: New version string
 
         Returns:
-            Tuple of (success, message)
+            Tuple of (status, message)
         """
+        file_path = target.path
+        pattern = target.pattern
+        replacement = target.replacement
+
         if not file_path.exists():
-            return False, f"File not found: {file_path}"
+            if target.optional:
+                return "SKIP", f"Optional file not found: {file_path}"
+            return "ERROR", f"Required file not found: {file_path}"
 
         try:
             content = file_path.read_text(encoding="utf-8")
@@ -116,7 +132,9 @@ class VersionUpdater:
             # Find current version
             match = re.search(pattern, content, re.MULTILINE)
             if not match:
-                return False, f"Version pattern not found in {file_path}"
+                if target.optional:
+                    return "SKIP", f"Version pattern not found in optional file: {file_path}"
+                return "ERROR", f"Version pattern not found in {file_path}"
 
             old_version = match.group(1)
 
@@ -125,12 +143,12 @@ class VersionUpdater:
             content = re.sub(pattern, new_line, content, flags=re.MULTILINE)
 
             if content == original_content:
-                return False, f"No changes made to {file_path}"
+                return "SKIP", f"No changes made to {file_path}"
 
-            return True, f"Updated {file_path.name}: {old_version} -> {new_version}"
+            return "OK", f"Updated {file_path.name}: {old_version} -> {new_version}"
 
         except Exception as e:
-            return False, f"Error updating {file_path}: {e}"
+            return "ERROR", f"Error updating {file_path}: {e}"
 
     def update_all(self, new_version: str, dry_run: bool = False) -> list[str]:
         """Update version in all project files.
@@ -169,23 +187,23 @@ class VersionUpdater:
             messages.append("")
 
         # Update each file
-        for file_path, pattern, replacement in self.files_to_update:
-            success, message = self.update_file(
-                file_path, pattern, replacement, new_version
-            )
+        for target in self.files_to_update:
+            status, message = self.update_file(target, new_version)
 
-            if success:
+            if status == "OK":
                 if not dry_run:
                     # Write the updated content
-                    content = file_path.read_text(encoding="utf-8")
-                    new_line = replacement.format(version=new_version)
-                    content = re.sub(pattern, new_line, content, flags=re.MULTILINE)
-                    file_path.write_text(content, encoding="utf-8")
+                    content = target.path.read_text(encoding="utf-8")
+                    new_line = target.replacement.format(version=new_version)
+                    content = re.sub(target.pattern, new_line, content, flags=re.MULTILINE)
+                    target.path.write_text(content, encoding="utf-8")
                     messages.append(f"[OK] {message}")
                 else:
                     messages.append(f"[DRY RUN] {message}")
+            elif status == "SKIP":
+                messages.append(f"[INFO] {message}")
             else:
-                messages.append(f"[WARN] {message}")
+                messages.append(f"[ERROR] {message}")
 
         return messages
 
@@ -228,7 +246,7 @@ Examples:
         print(message)
 
     # Exit with error code if any errors occurred
-    if any("[ERROR]" in msg or "[WARN]" in msg for msg in messages):
+    if any("[ERROR]" in msg for msg in messages):
         sys.exit(1)
 
     if not args.dry_run:

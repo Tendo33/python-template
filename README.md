@@ -96,7 +96,7 @@ logger.debug("这是一条调试日志")
 基于 Pydantic 的类型安全配置管理，支持环境变量和 .env 文件。
 
 ```python
-from python_template.utils.setting import get_settings
+from python_template.utils import get_settings
 
 # 获取配置（单例）
 settings = get_settings()
@@ -207,7 +207,7 @@ from python_template.utils import chunk_list, flatten_dict, merge_dicts
 
 # 列表分块
 items = [1, 2, 3, 4, 5]
-chunks = chunk_list(items, 2)  # [[1, 2], [3, 4], [5]]
+chunks = list(chunk_list(items, 2))  # [[1, 2], [3, 4], [5]]
 
 # 字典展平
 nested = {"a": {"b": 1}}
@@ -316,6 +316,8 @@ python-template/
 │   │   ├── setting.py         # 应用配置管理
 │   │   └── context.py         # 上下文管理
 │   └── models/             # 数据模型
+│       ├── base.py            # BaseModel 与通用 Mixin
+│       └── examples.py        # 示例模型 (User/ApiResponse 等)
 ├── tests/                  # 测试用例
 ├── scripts/                # 维护脚本
 │   ├── rename_package.py      # 重命名包脚本
@@ -331,7 +333,7 @@ python-template/
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/python-template.git
+git clone https://github.com/Tendo33/python-template.git
 cd python-template
 
 # 安装开发依赖
