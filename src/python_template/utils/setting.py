@@ -13,8 +13,8 @@ Usage / 使用方法:
     from python_template.utils.setting import get_settings
 
     settings = get_settings()
-    print(settings.app_name)
-    print(settings.debug)
+    print(settings.environment)
+    print(settings.log_level)
 
 How to add your own settings / 如何添加自己的配置项:
     1. Add field to Settings class / 在Settings类中添加字段
@@ -47,14 +47,7 @@ class Settings(BaseSettings):
     3. Default values / 默认值
     """
 
-    # Basic application settings / 基础应用配置
-    app_name: str = Field(
-        default="python-template", description="Application name / 应用名称"
-    )
-    app_version: str = Field(
-        default="0.1.0", description="Application version / 应用版本"
-    )
-    debug: bool = Field(default=False, description="Debug mode / 调试模式")
+    # Basic runtime settings / 基础运行时配置
     environment: str = Field(
         default="development",
         description="Environment: development/staging/production / 运行环境",
@@ -143,8 +136,8 @@ def get_settings() -> Settings:
     Example:
         >>> from python_template.utils.setting import get_settings
         >>> settings = get_settings()
-        >>> print(settings.app_name)
-        python-template
+        >>> print(settings.environment)
+        development
     """
     return Settings()
 

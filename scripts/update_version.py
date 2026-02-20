@@ -4,7 +4,6 @@
 This script updates the version number across all relevant files in the project:
 - pyproject.toml
 - src/python_template/__init__.py
-- .env.example (APP_VERSION)
 
 该脚本用于更新项目中所有相关文件的版本号。
 
@@ -58,12 +57,6 @@ class VersionUpdater:
                 path=project_root / "src" / "python_template" / "__init__.py",
                 pattern=r'^__version__ = "([^"]+)"',
                 replacement='__version__ = "{version}"',
-            ),
-            VersionTarget(
-                path=project_root / ".env.example",
-                pattern=r"^APP_VERSION=(.+)$",
-                replacement="APP_VERSION={version}",
-                optional=True,
             ),
         ]
 

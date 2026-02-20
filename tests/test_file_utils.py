@@ -5,7 +5,7 @@
 
 from pathlib import Path
 
-from python_template.utils import (
+from python_template.utils.file_utils import (
     calculate_file_hash,
     copy_file,
     delete_file,

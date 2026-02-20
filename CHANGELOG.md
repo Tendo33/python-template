@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Simplified default app configuration: removed `APP_NAME`/`APP_VERSION` and kept only `ENVIRONMENT` (dropped `DEBUG`) from baseline runtime mode env vars.
+
+## [0.2.0] - 2026-02-20
+
+### Changed
+- **Breaking:** narrowed `python_template.utils` top-level exports to a stable core API surface.
+- Moved non-core utility imports to submodule-based usage in tests and documentation.
+- Enforced test coverage gate with `--cov-fail-under=80`.
+- Removed duplicated dependency declarations by dropping `[dependency-groups]`.
+- Tightened sdist exclusions to keep assistant/tooling and local artifacts out of release packages.
+- Removed unused CLI placeholder configuration from project metadata.
+
 ### Added
 - Async decorators support (`async_timing_decorator`, `async_retry_decorator`, `async_catch_exceptions`)
 
@@ -41,5 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pytest and coverage configuration
   - Pre-commit hooks configuration
 
-[Unreleased]: https://github.com/Tendo33/python-template/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Tendo33/python-template/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Tendo33/python-template/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Tendo33/python-template/releases/tag/v0.1.0

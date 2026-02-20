@@ -19,7 +19,8 @@ cp .env.example .env
 from python_template.utils.setting import get_settings
 
 settings = get_settings()
-print(f"App: {settings.app_name} v{settings.app_version}")
+print(f"Env: {settings.environment}")
+print(f"Log level: {settings.log_level}")
 ```
 
 ## 如何添加自己的配置 / How to Add Your Own Settings

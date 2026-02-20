@@ -7,7 +7,7 @@ import asyncio
 
 import pytest
 
-from python_template.utils import (
+from python_template.utils.decorator_utils import (
     AsyncContextTimer,
     catch_exceptions,
     log_calls,

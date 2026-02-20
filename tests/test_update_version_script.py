@@ -16,8 +16,8 @@ def _load_update_version_module():
     return module
 
 
-def test_update_all_updates_required_and_env_files(tmp_path: Path) -> None:
-    """The script should update all available target files."""
+def test_update_all_updates_required_files(tmp_path: Path) -> None:
+    """The script should update all required target files."""
     module = _load_update_version_module()
     updater = module.VersionUpdater(tmp_path)
 
@@ -27,8 +27,6 @@ def test_update_all_updates_required_and_env_files(tmp_path: Path) -> None:
         '__version__ = "0.1.0"\n',
         encoding="utf-8",
     )
-    (tmp_path / ".env.example").write_text("APP_VERSION=0.1.0\n", encoding="utf-8")
-
     messages = updater.update_all("0.2.0", dry_run=False)
     assert not any("[ERROR]" in msg for msg in messages)
 
@@ -38,13 +36,10 @@ def test_update_all_updates_required_and_env_files(tmp_path: Path) -> None:
     assert '__version__ = "0.2.0"' in (
         tmp_path / "src" / "python_template" / "__init__.py"
     ).read_text(encoding="utf-8")
-    assert "APP_VERSION=0.2.0" in (tmp_path / ".env.example").read_text(
-        encoding="utf-8"
-    )
 
 
-def test_update_all_allows_missing_optional_env_file(tmp_path: Path) -> None:
-    """Missing optional .env.example should not cause an error."""
+def test_update_all_does_not_report_missing_optional_env_file(tmp_path: Path) -> None:
+    """No optional env file handling message should be emitted."""
     module = _load_update_version_module()
     updater = module.VersionUpdater(tmp_path)
 
@@ -57,4 +52,4 @@ def test_update_all_allows_missing_optional_env_file(tmp_path: Path) -> None:
 
     messages = updater.update_all("0.2.0", dry_run=False)
     assert not any("[ERROR]" in msg for msg in messages)
-    assert any("Optional file not found" in msg for msg in messages)
+    assert not any("Optional file not found" in msg for msg in messages)

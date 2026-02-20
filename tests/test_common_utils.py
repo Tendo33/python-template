@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from python_template.utils import (
+from python_template.utils.common_utils import (
     batch_process,
     chunk_list,
     clamp,

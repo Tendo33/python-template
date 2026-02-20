@@ -6,6 +6,17 @@
 
 一个现代化的 Python 工具库模板，集成了常用的工具函数和最佳实践。
 
+## ⚠️ v0.2.0 Breaking Changes
+
+`python_template.utils` 顶层导出已收敛为稳定核心 API。以下旧导入方式需要迁移到子模块：
+
+- `from python_template.utils import retry_decorator` -> `from python_template.utils.decorator_utils import retry_decorator`
+- `from python_template.utils import chunk_list` -> `from python_template.utils.common_utils import chunk_list`
+- `from python_template.utils import Context` -> `from python_template.utils.context import Context`
+- `from python_template.utils import list_files` -> `from python_template.utils.file_utils import list_files`
+
+保留在顶层 `python_template.utils` 的核心能力：日志、Settings、基础文件读写、基础 JSON 读写、基础日期时间工具。
+
 ## 🚀 开发者快速上手
 
 如果你是刚克隆此项目的开发人员，请按照以下顺序初始化项目：
@@ -103,13 +114,13 @@ uv run pytest
 
 - `pyproject.toml`：`name`、`description`、`authors`、`urls`
 - `src/<your_package>/__init__.py`：`__version__`
-- `.env.example`：`APP_NAME`、`APP_VERSION`
+- `.env.example`：`ENVIRONMENT`、`LOG_LEVEL`、`LOG_FILE`
 - `README.md`：项目名、安装方式、示例导入路径
 
 可用脚本统一更新版本号：
 
 ```bash
-python scripts/update_version.py 0.1.0
+python scripts/update_version.py 0.2.0
 ```
 
 ### 第 4 步：配置运行环境
@@ -118,7 +129,7 @@ python scripts/update_version.py 0.1.0
 # 复制环境变量模板
 cp .env.example .env
 
-# 按需修改 .env（至少确认 APP_NAME / ENVIRONMENT / LOG_LEVEL）
+# 按需修改 .env（至少确认 ENVIRONMENT / LOG_LEVEL）
 ```
 
 如果你有额外配置，直接在 `src/<your_package>/utils/setting.py` 的 `Settings` 类里新增字段，并同步更新 `.env.example`。
@@ -216,8 +227,6 @@ from python_template.utils import get_settings
 settings = get_settings()
 
 # 访问配置项
-print(f"App Name: {settings.app_name}")
-print(f"Debug Mode: {settings.debug}")
 print(f"Environment: {settings.environment}")
 print(f"Log Level: {settings.log_level}")
 
@@ -233,8 +242,6 @@ log_path = settings.get_log_file_path()
 cp .env.example .env
 
 # 编辑 .env 文件设置你的配置
-APP_NAME=my-app
-DEBUG=true
 ENVIRONMENT=development
 LOG_LEVEL=DEBUG
 ```
@@ -259,7 +266,11 @@ class Settings(BaseSettings):
 ### 3. 装饰器工具 (Decorators)
 
 ```python
-from python_template.utils import timing_decorator, retry_decorator, log_calls
+from python_template.utils.decorator_utils import (
+    log_calls,
+    retry_decorator,
+    timing_decorator,
+)
 
 # 计时装饰器
 @timing_decorator
@@ -282,7 +293,7 @@ def calculate(a, b):
 #### 异步装饰器 (Async Decorators)
 
 ```python
-from python_template.utils import (
+from python_template.utils.decorator_utils import (
     async_timing_decorator,
     async_retry_decorator,
     async_catch_exceptions,
@@ -317,7 +328,7 @@ async def process():
 ### 4. 通用工具 (Common Utils)
 
 ```python
-from python_template.utils import chunk_list, flatten_dict, merge_dicts
+from python_template.utils.common_utils import chunk_list, flatten_dict, merge_dicts
 
 # 列表分块
 items = [1, 2, 3, 4, 5]

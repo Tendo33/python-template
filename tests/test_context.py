@@ -5,7 +5,7 @@
 
 import pytest
 
-from python_template.utils import (
+from python_template.utils.context import (
     Context,
     ContextManager,
     async_context_scope,

@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 
+import pytest
+
 from python_template import utils
 
 
@@ -24,7 +26,7 @@ def test_utils_get_settings_returns_settings_instance() -> None:
     """`get_settings` should return a configured settings object."""
     settings = utils.get_settings()
     assert settings is not None
-    assert settings.app_name
+    assert settings.environment in {"development", "staging", "production"}
 
 
 def test_read_text_file_supports_default_value(tmp_path: Path) -> None:
@@ -39,3 +41,42 @@ def test_read_json_supports_default_value(tmp_path: Path) -> None:
     fallback = {"status": "missing"}
     result = utils.read_json(tmp_path / "missing.json", default=fallback)
     assert result == fallback
+
+
+def test_utils_removed_symbol_raises_import_error() -> None:
+    """Removed top-level symbols should no longer be importable from utils."""
+    with pytest.raises(ImportError):
+        exec("from python_template.utils import retry_decorator")
+
+
+def test_removed_symbol_remains_available_from_submodule() -> None:
+    """Removed top-level symbols are still available via submodules."""
+    from python_template.utils.decorator_utils import retry_decorator
+
+    assert callable(retry_decorator)
+
+
+def test_utils_wildcard_exports_only_core_symbols() -> None:
+    """`python_template.utils.__all__` should be the constrained core surface."""
+    expected = {
+        "get_logger",
+        "setup_logging",
+        "configure_json_logging",
+        "Settings",
+        "get_settings",
+        "reload_settings",
+        "ensure_directory",
+        "read_text_file",
+        "write_text_file",
+        "read_json",
+        "write_json",
+        "safe_json_loads",
+        "safe_json_dumps",
+        "get_timestamp",
+        "parse_timestamp",
+        "format_datetime",
+        "parse_datetime",
+        "get_current_date",
+        "get_current_time",
+    }
+    assert set(utils.__all__) == expected

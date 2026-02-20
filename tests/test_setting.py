@@ -22,16 +22,23 @@ def test_reload_settings_supports_custom_env_file(tmp_path: Path) -> None:
     """reload_settings should rebuild settings from the provided env file."""
     env_file = tmp_path / ".env.test"
     env_file.write_text(
-        "APP_NAME=from-env\nLOG_LEVEL=debug\nENVIRONMENT=production\n",
+        "LOG_LEVEL=debug\nENVIRONMENT=production\n",
         encoding="utf-8",
     )
 
     settings = reload_settings(env_file=env_file)
-    assert settings.app_name == "from-env"
     assert settings.log_level == "DEBUG"
     assert settings.environment == "production"
 
     get_settings.cache_clear()
+
+
+def test_settings_no_longer_include_app_name_or_version_or_debug() -> None:
+    """Template settings should only keep environment among runtime mode fields."""
+    settings = Settings()
+    assert not hasattr(settings, "app_name")
+    assert not hasattr(settings, "app_version")
+    assert not hasattr(settings, "debug")
 
 
 def test_settings_environment_validation() -> None:
