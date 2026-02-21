@@ -16,6 +16,7 @@
 - 文件 / JSON / 日期时间工具
 - 装饰器、上下文、通用工具函数
 - 可直接发布的打包与 CI 质量门禁
+- Tag 驱动的 GitHub Release 自动发布（支持模型生成 release message）
 
 ## 快速开始
 
@@ -170,7 +171,15 @@ python-template/
 - `python scripts/rename_package.py my_new_project`
 - `python scripts/setup_pre_commit.py`
 - `python scripts/update_version.py 0.2.0`
+- `python scripts/generate_release_notes.py --tag v0.2.0 --output .github/release-notes.md`
 - `uv run python scripts/run_vulture.py --min-confidence 80`
+
+## Release 自动发布
+
+- 推送 tag（如 `v0.3.0`）会触发 `/Users/simonsun/github_project/python-template/.github/workflows/release.yml`。
+- Workflow 会生成 release notes，并执行“存在则更新，不存在则创建”。
+- 模型相关配置统一走 CI 环境变量（如 `OPENAI_API_KEY`、`RELEASE_NOTES_MODEL`、`OPENAI_BASE_URL`）。
+- 若未配置模型密钥或模型调用失败，会自动回退到 deterministic 的非模型说明，不会阻塞发布。
 
 ## 文档
 
