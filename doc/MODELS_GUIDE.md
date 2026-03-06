@@ -51,13 +51,14 @@ class BaseModel(PydanticBaseModel):
 
 ```python
 from .base import BaseModel, TimestampMixin
-from .examples import User, ApiResponse, ConfigModel
+from .examples import User, ApiResponse, PaginatedResponse, ConfigModel
 
 __all__ = [
     "BaseModel",
     "TimestampMixin",
     "User",
     "ApiResponse",
+    "PaginatedResponse",
     "ConfigModel",
 ]
 ```

@@ -109,7 +109,7 @@ uv run pre-commit install
 
 ```bash
 # 1. 安装依赖
-uv sync
+uv sync --all-extras
 
 # 2. 安装 pre-commit 钩子
 uv run pre-commit install

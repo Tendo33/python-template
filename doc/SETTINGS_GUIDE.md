@@ -28,7 +28,7 @@ print(f"Log level: {settings.log_level}")
 ### 步骤 1: 在 Settings 类中添加字段
 
 ```python
-# 在 config/settings.py 的 Settings 类中添加
+# 在 src/python_template/config/settings.py 的 Settings 类中添加
 database_url: str = Field(
     default="sqlite:///./app.db",
     description="Database connection URL"
