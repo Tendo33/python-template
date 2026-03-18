@@ -2,6 +2,10 @@
 
 This document defines the frontend baseline for this project.
 
+> **Design System**: Before writing any UI code, read `ai_docs/frontend_design/DESIGN_SYSTEM.md`.
+> It defines the 5-layer design hierarchy (Principles → Tokens → Components → Patterns → Screens).
+> To refactor or redesign UI, **update the Design System document first**, then implement.
+
 ## Fixed Stack
 
 | Layer | Choice |

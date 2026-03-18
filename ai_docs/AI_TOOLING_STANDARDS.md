@@ -11,6 +11,7 @@ Before starting any implementation task, read `ai_docs/AI_TOOLING_STANDARDS.md` 
 | `AI_TOOLING_STANDARDS.md` | Global AI workflow and quality gates |
 | `BACKEND_STANDARDS.md` | Backend architecture and API rules |
 | `FRONTEND_STANDARDS.md` | Frontend stack and implementation conventions |
+| `frontend_design/DESIGN_SYSTEM.md` | **Frontend Design System** — 5-layer UI/UX spec (principles → tokens → components → patterns → screens). Read before any frontend UI work. Update before any UI refactor. |
 | `SCRIPTS_GUIDE.md` | Maintenance scripts (`rename_package`, `update_version`, etc.) |
 | `MODELS_GUIDE.md` | Pydantic model conventions |
 | `SETTINGS_GUIDE.md` | Configuration management with pydantic-settings |

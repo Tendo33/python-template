@@ -15,6 +15,7 @@ Use this file as the default project contract for Claude Code.
 - Core contract: `ai_docs/AI_TOOLING_STANDARDS.md` (contains full index of all docs).
 - Backend rules: `ai_docs/BACKEND_STANDARDS.md`.
 - Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`.
+- **Frontend Design System**: `ai_docs/frontend_design/DESIGN_SYSTEM.md` — read before any UI work; update before any UI refactor.
 - Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Keep code typed, readable, and modular.
 - Preserve existing project conventions unless asked to change them.
