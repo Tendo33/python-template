@@ -8,6 +8,8 @@ description: Use when implementing project tasks that need consistent coding sta
 
 Apply one consistent delivery workflow across backend and frontend tasks.
 
+**Reference:** Read `ai_docs/AI_TOOLING_STANDARDS.md` for the full docs index before starting.
+
 ## Workflow
 
 1. Confirm scope and assumptions.

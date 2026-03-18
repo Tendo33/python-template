@@ -11,9 +11,11 @@ Use this file as the default project contract for Codex.
 
 ## Engineering Rules
 
-- Follow `ai_docs/AI_TOOLING_STANDARDS.md`.
-- Follow `ai_docs/BACKEND_STANDARDS.md` for backend API/service tasks.
-- Prefer Python 3.10+ + uv + ruff + pytest for backend work.
+- **Read `ai_docs/` for project standards before starting work.**
+- Core contract: `ai_docs/AI_TOOLING_STANDARDS.md` (contains full index of all docs).
+- Backend rules: `ai_docs/BACKEND_STANDARDS.md`.
+- Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`.
+- Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Keep functions small, typed, and testable.
 - Handle errors explicitly; avoid silent failures.
 

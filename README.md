@@ -185,9 +185,10 @@ python-template/
 
 供 AI 助手参考的工程规范和使用指南：
 
-- `ai_docs/AI_TOOLING_STANDARDS.md` — AI 工程契约
+- `ai_docs/AI_TOOLING_STANDARDS.md` — AI 工程契约（含完整索引）
 - `ai_docs/BACKEND_STANDARDS.md` — 后端架构规范
 - `ai_docs/FRONTEND_STANDARDS.md` — 前端架构规范
+- `ai_docs/SCRIPTS_GUIDE.md` — 维护脚本（重命名包、升级版本）
 - `ai_docs/MODELS_GUIDE.md` — Pydantic 模型规范
 - `ai_docs/SETTINGS_GUIDE.md` — 配置管理指南
 - `ai_docs/SDK_USAGE.md` — SDK / src-layout 指南
