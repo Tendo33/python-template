@@ -1,284 +1,356 @@
 #!/usr/bin/env python3
-"""
-包名重命名脚本
+"""Package rename script.
 
-用法:
-    python scripts/rename_package.py <新包名>
+Usage:
+    python scripts/rename_package.py <new_package_name>
+    python scripts/rename_package.py --dry-run <new_package_name>
 
-例如:
+Example:
     python scripts/rename_package.py my_awesome_project
 
-此脚本会自动完成以下操作:
-    1. 重命名 src/python_template 目录为 src/<新包名>
-    2. 更新 pyproject.toml 中的所有包名引用
-    3. 更新 README.md 中的所有包名引用
-    4. 更新所有 Python 文件中的导入语句
-    5. 更新文档文件中的包名引用
+This script will:
+    1. Rename src/python_template/ directory to src/<new_name>/
+    2. Update all references in Python, TOML, Markdown, YAML, JSON,
+       TypeScript, HTML, CSS, and AI config files (.mdc, .cursorrules)
+    3. Update frontend/package.json name field
+    4. Update frontend/index.html <title>
 """
 
 import argparse
 import io
+import json
+import re
 import shutil
 import sys
 from pathlib import Path
 
-# 修复 Windows 控制台编码问题
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-# 旧包名
 OLD_PACKAGE_NAME = "python_template"
 OLD_PROJECT_NAME = "python-template"
 
+SCAN_EXTENSIONS: set[str] = {
+    # Python / backend
+    ".py",
+    ".toml",
+    ".cfg",
+    ".ini",
+    # Documentation
+    ".md",
+    ".rst",
+    ".txt",
+    # Frontend
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".json",
+    ".css",
+    ".html",
+    # Config / CI
+    ".yaml",
+    ".yml",
+    ".mdc",
+}
+
+SCAN_EXACT_NAMES: set[str] = {
+    "Makefile",
+    "Dockerfile",
+    ".gitignore",
+    ".env.example",
+    ".cursorrules",
+    "components.json",
+}
+
+EXCLUDE_DIRS: set[str] = {
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".ruff_cache",
+    ".pytest_cache",
+    ".mypy_cache",
+    "node_modules",
+    "dist",
+    "build",
+    ".history",
+    "logs",
+    "htmlcov",
+    ".tox",
+    ".nox",
+    "pnpm-lock.yaml",
+}
+
 
 def get_project_root() -> Path:
-    """获取项目根目录"""
-    return Path(__file__).parent.parent
+    return Path(__file__).resolve().parent.parent
 
 
 def validate_package_name(name: str) -> bool:
-    """
-    验证包名是否有效
-    - 必须以字母或下划线开头
-    - 只能包含字母、数字和下划线
-    - 不能是 Python 关键字
-    """
+    """Return True if *name* is a valid Python package identifier."""
     import keyword
 
-    if not name:
+    if not name or not name.isidentifier():
         return False
-
-    # 检查是否是有效的 Python 标识符
-    if not name.isidentifier():
-        return False
-
-    # 检查是否是 Python 关键字
     return not keyword.iskeyword(name)
 
 
 def to_project_name(package_name: str) -> str:
-    """
-    将包名转换为项目名 (下划线转换为连字符)
-    例如: my_awesome_project -> my-awesome-project
-    """
+    """Convert underscore package name to hyphenated project name."""
     return package_name.replace("_", "-")
 
 
-def rename_directory(root: Path, new_package_name: str) -> bool:
-    """重命名包目录"""
-    old_dir = root / "src" / OLD_PACKAGE_NAME
-    new_dir = root / "src" / new_package_name
-
-    if not old_dir.exists():
-        print(f"❌ 错误: 源目录不存在: {old_dir}")
-        return False
-
-    if new_dir.exists():
-        print(f"❌ 错误: 目标目录已存在: {new_dir}")
-        return False
-
-    try:
-        shutil.move(str(old_dir), str(new_dir))
-        print(f"✅ 重命名目录: {old_dir.name} -> {new_dir.name}")
-        return True
-    except Exception as e:
-        print(f"❌ 重命名目录失败: {e}")
-        return False
+def collect_files(root: Path) -> list[Path]:
+    """Collect all text files that may contain package-name references."""
+    files: list[Path] = []
+    for item in root.rglob("*"):
+        if any(part in EXCLUDE_DIRS for part in item.parts):
+            continue
+        if not item.is_file():
+            continue
+        if item.suffix in SCAN_EXTENSIONS or item.name in SCAN_EXACT_NAMES:
+            files.append(item)
+    return sorted(files)
 
 
-def update_file_content(
-    file_path: Path,
+def replace_in_content(
+    content: str,
+    old_package: str,
+    new_package: str,
+    old_project: str,
+    new_project: str,
+) -> str:
+    """Replace package name and project name throughout *content*."""
+    content = content.replace(old_package, new_package)
+    content = content.replace(old_project, new_project)
+    return content
+
+
+def update_file(
+    path: Path,
     old_package: str,
     new_package: str,
     old_project: str,
     new_project: str,
 ) -> bool:
-    """更新文件内容，替换包名和项目名"""
+    """Update a single file in-place. Return True if content changed."""
     try:
-        content = file_path.read_text(encoding="utf-8")
-        original_content = content
-
-        # 替换包名 (下划线版本)
-        content = content.replace(old_package, new_package)
-
-        # 替换项目名 (连字符版本)
-        content = content.replace(old_project, new_project)
-
-        if content != original_content:
-            file_path.write_text(content, encoding="utf-8")
-            return True
-        return False
+        original = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
-        # 跳过二进制文件
         return False
-    except Exception as e:
-        print(f"⚠️ 更新文件失败 {file_path}: {e}")
+    except Exception:
         return False
 
+    updated = replace_in_content(
+        original, old_package, new_package, old_project, new_project
+    )
+    if updated == original:
+        return False
 
-def get_files_to_update(root: Path) -> list[Path]:
-    """获取需要更新的文件列表"""
-    files = []
-
-    # 需要更新的文件扩展名
-    extensions = {
-        ".py",
-        ".md",
-        ".toml",
-        ".yaml",
-        ".yml",
-        ".txt",
-        ".rst",
-        ".cfg",
-        ".ini",
-    }
-
-    # 需要排除的目录
-    exclude_dirs = {
-        ".git",
-        ".venv",
-        "venv",
-        "__pycache__",
-        ".ruff_cache",
-        ".pytest_cache",
-        "node_modules",
-        ".history",
-        "logs",
-    }
-
-    for item in root.rglob("*"):
-        # 跳过排除的目录
-        if any(excluded in item.parts for excluded in exclude_dirs):
-            continue
-
-        # 检查文件扩展名
-        if item.is_file() and (
-            item.suffix in extensions
-            or item.name in {"Makefile", "Dockerfile", ".gitignore", ".env.example"}
-        ):
-            files.append(item)
-
-    return files
+    path.write_text(updated, encoding="utf-8")
+    return True
 
 
-def main():
+def update_frontend_package_json(
+    root: Path,
+    new_project: str,
+    *,
+    dry_run: bool,
+) -> bool:
+    """Set the frontend package.json ``name`` field to *new_project*."""
+    pkg_path = root / "frontend" / "package.json"
+    if not pkg_path.exists():
+        return False
+    try:
+        data = json.loads(pkg_path.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+
+    old_name = data.get("name", "")
+    if old_name == new_project:
+        return False
+
+    data["name"] = new_project
+    if not dry_run:
+        pkg_path.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    return True
+
+
+def update_frontend_html_title(
+    root: Path,
+    new_title: str,
+    old_title_pattern: str,
+    *,
+    dry_run: bool,
+) -> bool:
+    """Replace <title>...</title> in frontend/index.html."""
+    html_path = root / "frontend" / "index.html"
+    if not html_path.exists():
+        return False
+    content = html_path.read_text(encoding="utf-8")
+    new_content = re.sub(
+        rf"<title>{re.escape(old_title_pattern)}</title>",
+        f"<title>{new_title}</title>",
+        content,
+    )
+    if new_content == content:
+        new_content = re.sub(
+            r"<title>[^<]*</title>",
+            f"<title>{new_title}</title>",
+            content,
+        )
+    if new_content == content:
+        return False
+    if not dry_run:
+        html_path.write_text(new_content, encoding="utf-8")
+    return True
+
+
+def rename_src_directory(root: Path, new_package: str) -> bool:
+    """Rename src/<OLD>/ to src/<new_package>/."""
+    old_dir = root / "src" / OLD_PACKAGE_NAME
+    new_dir = root / "src" / new_package
+    if not old_dir.exists():
+        print(f"  [ERROR] Source directory does not exist: {old_dir}")
+        return False
+    if new_dir.exists():
+        print(f"  [ERROR] Target directory already exists: {new_dir}")
+        return False
+    shutil.move(str(old_dir), str(new_dir))
+    return True
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="重命名 Python 包名",
+        description="Rename package across the entire project (backend + frontend + AI configs)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-示例:
+        epilog="""\
+Examples:
     python scripts/rename_package.py my_new_package
     python scripts/rename_package.py --dry-run my_new_package
-        """,
+""",
     )
     parser.add_argument(
         "new_package_name",
-        help="新的包名 (使用下划线, 例如: my_awesome_project)",
+        help="New package name (snake_case, e.g. my_awesome_project)",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="预览模式，只显示将要修改的内容，不实际执行",
+        help="Preview changes without writing anything",
     )
-
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Skip interactive confirmation",
+    )
     args = parser.parse_args()
-    new_package_name = args.new_package_name
-    dry_run = args.dry_run
 
-    # 验证包名
-    if not validate_package_name(new_package_name):
-        print(f"❌ 无效的包名: '{new_package_name}'")
-        print("包名必须:")
-        print("  - 以字母或下划线开头")
-        print("  - 只包含字母、数字和下划线")
-        print("  - 不能是 Python 关键字")
-        sys.exit(1)
-
-    new_project_name = to_project_name(new_package_name)
+    new_package = args.new_package_name
+    new_project = to_project_name(new_package)
+    dry_run: bool = args.dry_run
     root = get_project_root()
 
-    print(f"\n{'=' * 60}")
-    print("包名重命名工具")
-    print(f"{'=' * 60}")
-    print(f"项目根目录: {root}")
-    print(f"旧包名: {OLD_PACKAGE_NAME} -> 新包名: {new_package_name}")
-    print(f"旧项目名: {OLD_PROJECT_NAME} -> 新项目名: {new_project_name}")
-    if dry_run:
-        print("⚠️ 预览模式 - 不会执行实际修改")
-    print(f"{'=' * 60}\n")
+    if not validate_package_name(new_package):
+        print(f"[ERROR] Invalid package name: '{new_package}'")
+        print("  Must start with a letter/underscore, contain only [a-zA-Z0-9_],")
+        print("  and not be a Python keyword.")
+        sys.exit(1)
 
-    # 检查旧目录是否存在
     old_dir = root / "src" / OLD_PACKAGE_NAME
     if not old_dir.exists():
-        print(f"❌ 错误: 包目录不存在: {old_dir}")
-        print("可能包名已经被修改过，或者项目结构不正确。")
+        print(f"[ERROR] Package directory not found: {old_dir}")
+        print("  The package may have been renamed already.")
         sys.exit(1)
 
-    # 获取需要更新的文件
-    files = get_files_to_update(root)
+    # --- Scan ---
+    print(f"\n{'=' * 62}")
+    print("  Package Rename Tool")
+    print(f"{'=' * 62}")
+    print(f"  Root:        {root}")
+    print(f"  Package:     {OLD_PACKAGE_NAME} -> {new_package}")
+    print(f"  Project:     {OLD_PROJECT_NAME} -> {new_project}")
+    if dry_run:
+        print("  Mode:        DRY RUN (no files will be modified)")
+    print(f"{'=' * 62}\n")
 
-    # 统计将要修改的文件
-    files_to_modify = []
-    for file_path in files:
+    all_files = collect_files(root)
+    files_with_hits: list[Path] = []
+    for fp in all_files:
         try:
-            content = file_path.read_text(encoding="utf-8")
-            if OLD_PACKAGE_NAME in content or OLD_PROJECT_NAME in content:
-                files_to_modify.append(file_path)
-        except (UnicodeDecodeError, Exception):
+            text = fp.read_text(encoding="utf-8")
+        except Exception:
             continue
+        if OLD_PACKAGE_NAME in text or OLD_PROJECT_NAME in text:
+            files_with_hits.append(fp)
 
-    print("📁 将要重命名目录:")
-    print(f"   src/{OLD_PACKAGE_NAME} -> src/{new_package_name}")
-    print()
+    print(f"[1/4] Directory rename:  src/{OLD_PACKAGE_NAME}/ -> src/{new_package}/")
+    print(f"[2/4] Text replacement:  {len(files_with_hits)} files")
+    for fp in files_with_hits:
+        print(f"       {fp.relative_to(root)}")
 
-    print(f"📝 将要更新的文件 ({len(files_to_modify)} 个):")
-    for f in sorted(files_to_modify):
-        print(f"   {f.relative_to(root)}")
+    fe_pkg = root / "frontend" / "package.json"
+    fe_html = root / "frontend" / "index.html"
+    print(
+        f"[3/4] Frontend name:     {'frontend/package.json' if fe_pkg.exists() else '(not found)'}"
+    )
+    print(
+        f"[4/4] Frontend title:    {'frontend/index.html' if fe_html.exists() else '(not found)'}"
+    )
     print()
 
     if dry_run:
-        print("✅ 预览完成。使用不带 --dry-run 的命令来执行实际修改。")
+        print("[DRY RUN] No changes made. Re-run without --dry-run to apply.")
         sys.exit(0)
 
-    # 确认执行
-    confirm = input("确认执行以上修改? (y/N): ").strip().lower()
-    if confirm != "y":
-        print("操作已取消。")
-        sys.exit(0)
+    if not args.yes:
+        answer = input("Proceed? (y/N): ").strip().lower()
+        if answer != "y":
+            print("Aborted.")
+            sys.exit(0)
 
-    print("\n开始执行修改...\n")
-
-    # 1. 先更新文件内容
-    updated_count = 0
-    for file_path in files_to_modify:
-        if update_file_content(
-            file_path,
-            OLD_PACKAGE_NAME,
-            new_package_name,
-            OLD_PROJECT_NAME,
-            new_project_name,
+    # --- Execute ---
+    print()
+    updated = 0
+    for fp in files_with_hits:
+        if update_file(
+            fp, OLD_PACKAGE_NAME, new_package, OLD_PROJECT_NAME, new_project
         ):
-            updated_count += 1
-            print(f"  ✅ 更新: {file_path.relative_to(root)}")
+            updated += 1
+            print(f"  [OK] {fp.relative_to(root)}")
 
-    # 2. 重命名目录
+    if update_frontend_package_json(root, new_project, dry_run=False):
+        updated += 1
+        print("  [OK] frontend/package.json  (name field)")
+
+    title_stem = new_project.replace("-", " ").title()
+    if update_frontend_html_title(root, title_stem, "Python Template", dry_run=False):
+        updated += 1
+        print("  [OK] frontend/index.html  (<title>)")
+
     print()
-    if not rename_directory(root, new_package_name):
-        print("\n❌ 重命名目录失败，请手动检查并修复。")
+    if not rename_src_directory(root, new_package):
+        print("[ERROR] Directory rename failed. Check manually.")
         sys.exit(1)
+    print(f"  [OK] src/{OLD_PACKAGE_NAME}/ -> src/{new_package}/")
 
-    print(f"\n{'=' * 60}")
-    print("✅ 完成!")
-    print(f"{'=' * 60}")
-    print(f"  • 更新了 {updated_count} 个文件")
-    print("  • 重命名了包目录")
+    print(f"\n{'=' * 62}")
+    print(f"  Done — {updated} files updated, directory renamed")
+    print(f"{'=' * 62}")
     print()
-    print("📌 后续步骤:")
-    print("  1. 检查修改是否正确: git diff")
-    print("  2. 重新安装包: uv pip install -e .")
-    print("  3. 运行测试确认: pytest")
-    print("  4. 提交更改: git add -A && git commit -m 'chore: rename package'")
+    print("Next steps:")
+    print("  1. Review changes:      git diff")
+    print("  2. Reinstall package:   uv pip install -e .")
+    print("  3. Run tests:           uv run pytest")
+    print(
+        "  4. Commit:              git add -A && git commit -m 'chore: rename package'"
+    )
     print()
 
 
