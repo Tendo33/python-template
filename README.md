@@ -24,9 +24,10 @@
 
 ```bash
 uv sync --all-extras
+pnpm --prefix frontend install
 ```
 
-### 2) 初始化环境变量
+### 2) 初始化环境变量（后端）
 
 ```bash
 cp .env.example .env
@@ -40,13 +41,47 @@ LOG_LEVEL=INFO
 LOG_FILE=logs/app.log
 ```
 
-### 3) 运行质量检查
+### 后端快速开始
+
+```bash
+uv run pytest
+```
+
+完整后端检查：
 
 ```bash
 uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 uv run mypy src
 uv run pytest
+```
+
+### 前端快速开始
+
+```bash
+pnpm --prefix frontend dev
+```
+
+完整前端检查：
+
+```bash
+pnpm --prefix frontend lint
+pnpm --prefix frontend typecheck
+pnpm --prefix frontend test
+pnpm --prefix frontend build
+```
+
+### 全量检查（后端 + 前端）
+
+```bash
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src
+uv run pytest
+pnpm --prefix frontend lint
+pnpm --prefix frontend typecheck
+pnpm --prefix frontend test
+pnpm --prefix frontend build
 ```
 
 ## 用这个 Template 创建新项目
@@ -81,16 +116,20 @@ python scripts/rename_package.py my_new_project
 python scripts/update_version.py 0.2.0
 ```
 
-### 4) 验证模板改名后可用
+### 5) 验证模板改名后可用
 
 ```bash
 uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 uv run mypy src
 uv run pytest
+pnpm --prefix frontend lint
+pnpm --prefix frontend typecheck
+pnpm --prefix frontend test
+pnpm --prefix frontend build
 ```
 
-### 5) （可选）启用提交前检查
+### 6) （可选）启用提交前检查
 
 ```bash
 python scripts/setup_pre_commit.py
@@ -176,7 +215,7 @@ python-template/
 
 ## Release 自动发布
 
-- 推送 tag（如 `v0.3.0`）会触发 `/Users/simonsun/github_project/python-template/.github/workflows/release.yml`。
+- 推送 tag（如 `v0.3.0`）会触发 `.github/workflows/release.yml`。
 - Workflow 会生成 release notes，并执行“存在则更新，不存在则创建”。
 - 模型相关配置统一走 CI 环境变量（如 `OPENAI_API_KEY`、`RELEASE_NOTES_MODEL`、`OPENAI_BASE_URL`）。
 - 若未配置模型密钥或模型调用失败，会自动回退到 deterministic 的非模型说明，不会阻塞发布。

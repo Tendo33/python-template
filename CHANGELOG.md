@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Documentation refreshed to match current repository state, including unified `ai_docs/` guidance and script usage docs.
+- README updated with frontend setup and verification commands (`pnpm --prefix frontend ...`) and corrected release workflow path.
+- `rename_package.py` now covers frontend assets/config and AI-tooling config files when renaming project/package identifiers.
+- `update_version.py` now updates backend + frontend version targets and auto-detects package directory under `src/`.
 - **Breaking:** refactored module layout by moving `setting/context/protocols/logger_util` out of `utils` into `config/settings`, `core/context`, `contracts/protocols`, and `observability/log_config`; removed legacy import paths.
 - Simplified default app configuration: removed `APP_NAME`/`APP_VERSION` and kept only `ENVIRONMENT` (dropped `DEBUG`) from baseline runtime mode env vars.
 - Unified retry implementation by reusing `decorator_utils` retry internals from `common_utils`.

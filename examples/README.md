@@ -9,7 +9,10 @@
 ## 运行示例
 
 ```bash
-# 运行 utils 示例
+# 推荐（使用项目虚拟环境）
+uv run python examples/utils_example.py
+
+# 或直接使用当前 Python
 python examples/utils_example.py
 ```
 

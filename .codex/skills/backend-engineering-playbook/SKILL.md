@@ -8,6 +8,8 @@ description: Use when implementing backend API or service tasks that need archit
 
 Deliver backend changes that are predictable, testable, and production-safe.
 
+**Reference first:** `ai_docs/AI_TOOLING_STANDARDS.md` (then `ai_docs/BACKEND_STANDARDS.md`).
+
 ## Default Stack (Unless User Overrides)
 
 - Python 3.10+
