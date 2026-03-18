@@ -16,7 +16,7 @@ This document defines one shared engineering contract for all AI assistants used
 3. Prefer existing project conventions over personal preference.
 4. Verify before claiming completion.
 
-## Backend Baseline (Python)
+## Backend Stack (Python)
 
 - Runtime: Python 3.10+
 - Dependency management: `uv`
@@ -31,7 +31,7 @@ If a backend API/service is needed and no framework is specified, default to:
 - SQLAlchemy + Alembic for persistence and migrations
 - Redis for cache/short-lived state when required
 
-Recommended verification sequence:
+Backend verification:
 
 ```bash
 uv run ruff check src tests scripts
@@ -40,41 +40,44 @@ uv run mypy src
 uv run pytest
 ```
 
-For detailed backend engineering rules, see `doc/BACKEND_STANDARDS.md`.
+For detailed backend engineering rules, see `ai_docs/BACKEND_STANDARDS.md`.
 
-## Frontend Baseline (Default Stack)
+## Frontend Stack
 
-When frontend work is needed and no other stack is specified, use:
+For detailed frontend engineering rules, see `ai_docs/FRONTEND_STANDARDS.md`.
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
+Fixed tech stack — do not change unless explicitly requested:
+
+| Layer | Choice |
+| :--- | :--- |
+| Package manager | **pnpm** |
+| Framework | React |
+| Language | TypeScript (strict) |
+| Bundler | Vite |
+| Styling | Tailwind CSS |
+| Component library | **shadcn/ui** |
 
 Preferred layout:
 
-- `frontend/src/app` for app shell and routing
-- `frontend/src/features/*` for domain modules
-- `frontend/src/components/ui` for shared visual primitives
-- `frontend/src/lib` for utilities and API wrappers
+- `frontend/src/app` — app shell and routing
+- `frontend/src/features/*` — domain modules
+- `frontend/src/components/ui` — shadcn/ui primitives and shared components
+- `frontend/src/lib` — utilities and API wrappers
 
-Quality gates:
+Frontend conventions:
+
+- Use shadcn/ui components as building blocks; customize via Tailwind and CSS variables.
+- Prefer semantic HTML, keyboard accessibility, and visible focus states.
+- Avoid `any` except for documented edge cases.
+
+Frontend verification:
 
 ```bash
-npm --prefix frontend run lint
-npm --prefix frontend run typecheck
-npm --prefix frontend run test
-npm --prefix frontend run build
+pnpm --prefix frontend lint
+pnpm --prefix frontend typecheck
+pnpm --prefix frontend test
+pnpm --prefix frontend build
 ```
-
-## UI/UX Workflow (ui-ux-pro-max)
-
-For page/component design tasks:
-
-1. Run `ui-ux-pro-max` with `--design-system` first.
-2. Start from accessibility, responsiveness, and visual hierarchy.
-3. Convert output into reusable design tokens (color, spacing, typography, radius, shadow).
-4. Implement in Tailwind with consistent naming and component variants.
 
 ## Definition of Done
 

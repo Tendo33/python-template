@@ -161,7 +161,7 @@ python-template/
 │   └── utils/
 ├── tests/
 ├── scripts/
-├── doc/
+├── ai_docs/
 ├── pyproject.toml
 └── README.md
 ```
@@ -181,14 +181,17 @@ python-template/
 - 模型相关配置统一走 CI 环境变量（如 `OPENAI_API_KEY`、`RELEASE_NOTES_MODEL`、`OPENAI_BASE_URL`）。
 - 若未配置模型密钥或模型调用失败，会自动回退到 deterministic 的非模型说明，不会阻塞发布。
 
-## 文档
+## AI 文档 (ai_docs/)
 
-- `doc/SETTINGS_GUIDE.md`
-- `doc/MODELS_GUIDE.md`
-- `doc/SDK_USAGE.md`
-- `doc/PRE_COMMIT_GUIDE.md`
-- `doc/AI_TOOLING_STANDARDS.md`
-- `doc/BACKEND_STANDARDS.md`
+供 AI 助手参考的工程规范和使用指南：
+
+- `ai_docs/AI_TOOLING_STANDARDS.md` — AI 工程契约
+- `ai_docs/BACKEND_STANDARDS.md` — 后端架构规范
+- `ai_docs/FRONTEND_STANDARDS.md` — 前端架构规范
+- `ai_docs/MODELS_GUIDE.md` — Pydantic 模型规范
+- `ai_docs/SETTINGS_GUIDE.md` — 配置管理指南
+- `ai_docs/SDK_USAGE.md` — SDK / src-layout 指南
+- `ai_docs/PRE_COMMIT_GUIDE.md` — Pre-commit 使用指南
 
 ## 许可证
 
