@@ -29,7 +29,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --all-extras --index-url https://pypi.org/simple
 
       - name: Ruff lint
         run: uv run ruff check src tests scripts
@@ -42,3 +42,33 @@ jobs:
 
       - name: Pytest
         run: uv run pytest
+
+  frontend:
+    name: Frontend Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install frontend dependencies
+        run: pnpm --prefix frontend install --frozen-lockfile
+
+      - name: Frontend lint
+        run: pnpm --prefix frontend lint
+
+      - name: Frontend typecheck
+        run: pnpm --prefix frontend typecheck
+
+      - name: Frontend build
+        run: pnpm --prefix frontend build
