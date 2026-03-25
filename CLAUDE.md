@@ -18,6 +18,7 @@ Use this file as the default project contract for Claude Code.
 - **Frontend Design System**: `ai_docs/frontend_design/DESIGN_SYSTEM.md` — read before any UI work; update before any UI refactor.
 - Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Keep code typed, readable, and modular.
+- Backend code should stay concise, easy to understand, and cleanly structured; avoid clever but opaque abstractions.
 - Preserve existing project conventions unless asked to change them.
 
 ## Tech Stack

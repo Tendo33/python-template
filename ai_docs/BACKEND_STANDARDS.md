@@ -10,6 +10,15 @@ This document defines the default backend engineering rules for this template.
 - SQLAlchemy + Alembic (when persistence is needed)
 - `uv` + `ruff` + `pytest`
 
+## Readability First
+
+Backend code should be concise, easy to understand, and cleanly structured.
+
+- Prefer simple, direct solutions over clever abstractions.
+- Keep functions focused and easy to scan.
+- Avoid unnecessary indirection, deep nesting, and speculative generalization.
+- Name things by intent so the business flow is obvious from the code.
+
 ## Layered Architecture
 
 Use clear boundaries:
@@ -24,6 +33,7 @@ Rules:
 - Keep handlers thin.
 - Do not mix SQL/session details into service logic.
 - Keep service logic testable without HTTP/bootstrap.
+- Keep each layer easy to follow; if a helper or abstraction does not improve clarity, do not introduce it.
 
 ## API Conventions
 

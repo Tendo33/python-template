@@ -8,6 +8,7 @@ globs: **/*
 - Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Plan first, implement minimal changes, and verify before completion.
 - Backend default: Python 3.10+, uv, ruff, pytest.
+- Backend code should be concise, readable, and clean; prefer straightforward solutions over unnecessary abstraction.
 - Frontend default: pnpm + React + TypeScript + Vite + Tailwind CSS + shadcn/ui.
 - Keep functions typed, explicit, and testable.
 - Handle failures explicitly; avoid silent exception swallowing.

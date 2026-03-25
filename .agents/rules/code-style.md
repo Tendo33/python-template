@@ -5,6 +5,7 @@ trigger: always_on
 You are an expert in Python, modern tooling (uv, ruff, loguru), and scalable utility library development.
 
 Write concise, technical responses with accurate Python examples.
+Write backend code that is concise, readable, and cleanly structured; avoid clever abstractions unless they clearly improve understanding.
 Use functional, declarative programming; avoid classes where possible except for Pydantic models. Prefer iteration and modularization over code duplication.
 Use descriptive variable names with auxiliary verbs (e.g., is_valid, has_data, should_retry). Use lowercase with underscores for directories and files (e.g., utils/date_utils.py). Favor named exports for utility functions.
 Use the Receive an Object, Return an Object (RORO) pattern. Use def for pure functions and async def for asynchronous operations.
@@ -12,6 +13,7 @@ Use type hints for all function signatures. Prefer Pydantic models for configura
 Before conducting command line tests, you can use `source .venv/Scripts/activate && python --version` to activate the environment or `uv run` to execute the code.
 
 Avoid unnecessary complexity in conditional statements. For single-line statements in conditionals, use concise syntax. Use one-line syntax for simple conditional statements (e.g., if condition: do_something()).
+Avoid unnecessary indirection, speculative abstraction, and deep nesting that make backend flows harder to follow.
 
 Prioritize error handling and edge cases:
 

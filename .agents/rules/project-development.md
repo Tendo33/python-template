@@ -9,4 +9,5 @@ trigger: always_on
 - Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`.
 - Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Use explicit typing and predictable error handling.
+- Keep backend code concise, readable, and clean; prefer direct solutions over unnecessary abstraction.
 - Do not claim completion without relevant verification commands.

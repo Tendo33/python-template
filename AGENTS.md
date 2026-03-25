@@ -18,6 +18,7 @@ Use this file as the default project contract for Codex.
 - **Frontend Design System**: `ai_docs/frontend_design/DESIGN_SYSTEM.md` — read before any UI work; update before any UI refactor.
 - Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
 - Keep functions small, typed, and testable.
+- Backend code should be concise, readable, and clean; prefer direct solutions over unnecessary abstraction.
 - Handle errors explicitly; avoid silent failures.
 
 ## Tech Stack

@@ -18,6 +18,7 @@ Apply one consistent delivery workflow across backend and frontend tasks.
 - `uv` for dependencies and execution
 - `ruff` for lint/format
 - `pytest` for tests
+- Keep backend code concise, easy to understand, and cleanly structured.
 
 For deeper backend architecture rules, use `backend-engineering-playbook`.
 

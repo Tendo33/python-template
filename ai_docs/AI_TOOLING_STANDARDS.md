@@ -32,6 +32,7 @@ Before starting any implementation task, read `ai_docs/AI_TOOLING_STANDARDS.md` 
 - `ruff` for lint + format
 - `pytest` for tests
 - If API is needed: FastAPI + Pydantic v2 + SQLAlchemy + Alembic
+- Backend code must stay concise, readable, and clean. Prefer straightforward designs over clever abstractions, and avoid unnecessary indirection.
 
 Backend verification:
 

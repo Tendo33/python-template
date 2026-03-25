@@ -3,6 +3,7 @@ description: Enforces general Python coding style guidelines for utility library
 globs: **/*.py
 ---
 - Write concise, technical responses with accurate Python examples.
+- Write backend code that is concise, readable, and cleanly structured; do not introduce clever abstractions unless they clearly improve clarity.
 - Use functional, declarative programming; avoid classes except for Pydantic BaseModel and necessary data structures.
 - Prefer iteration and modularization over code duplication.
 - Use descriptive variable names with auxiliary verbs (e.g., is_valid, has_data, should_retry).
@@ -15,6 +16,7 @@ globs: **/*.py
 - Prefer Pydantic models for configuration and data validation over raw dictionaries.
 - Use Optional[T] explicitly instead of T | None for better Python 3.8+ compatibility.
 - Avoid unnecessary complexity in conditional statements.
+- Avoid unnecessary indirection, speculative abstraction, and deeply nested control flow.
 - Use concise, one-line syntax for simple conditional statements (e.g., if condition: do_something()).
 - Follow PEP 8 naming conventions: snake_case for functions/variables, PascalCase for classes.
 - Use docstrings (Google style) for all public functions and classes.

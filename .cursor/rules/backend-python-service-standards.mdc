@@ -5,6 +5,7 @@ globs: src/**/*.py, tests/**/*.py
 - For backend API/service work, follow `ai_docs/BACKEND_STANDARDS.md`. See `ai_docs/AI_TOOLING_STANDARDS.md` for full docs index.
 - Use layered boundaries: API -> service -> repository -> domain.
 - Keep route handlers thin; place business logic in service layer.
+- Keep backend code concise, easy to understand, and clean; prefer direct solutions over unnecessary abstraction.
 - Use Pydantic v2 models for request/response and validation.
 - Keep persistence logic in repository layer and use explicit transaction boundaries.
 - Handle errors explicitly and return structured, stable error payloads.
