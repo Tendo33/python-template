@@ -70,6 +70,15 @@ Rules:
 - lint/format checks pass
 - docs/migrations updated when needed
 
+## Backend README notes
+
+If the repository uses this template as a starting point, the project README should explain backend usage in plain language.
+
+- Keep backend setup commands close to the top-level `Quick Start`.
+- Include one small import or usage example instead of a long API dump.
+- Explain what the backend package already provides, not just which directories exist.
+- Keep verification commands in a dedicated section so new contributors can run them without hunting through docs.
+
 Recommended checks:
 
 ```bash

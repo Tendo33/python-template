@@ -25,6 +25,32 @@ Before starting any implementation task, read `ai_docs/AI_TOOLING_STANDARDS.md` 
 3. Follow project conventions from `ai_docs/`.
 4. Verify before claiming completion.
 
+## README standard for template-based projects
+
+When a new project is created from this template, treat `README.md` as a product-facing entry page rather than a plain file index.
+
+Required structure:
+
+1. A clear title and one short subtitle that explains what the project is and who it is for.
+2. A first-screen action area with quick navigation links or badge-style buttons.
+3. A table of contents near the top for fast scanning.
+4. A `Quick Start` section with the shortest path from clone to first successful run.
+5. A `Use This Template` or equivalent setup section for projects generated from this repository.
+6. Screenshot placeholders or real screenshots placed early in the README.
+7. A project structure section that helps new contributors orient quickly.
+8. Verification commands, release workflow, and links to `ai_docs/`.
+
+Writing rules:
+
+- Write for humans first. Use natural, direct language and avoid inflated or AI-sounding phrasing.
+- Prefer short paragraphs, concrete statements, and copyable commands.
+- Show the fastest happy path before the full reference material.
+- Keep sections skimmable. A reader should understand the project in less than a minute.
+- Borrow layout ideas from strong open source READMEs when useful, but do not copy their wording or project framing.
+- When screenshots are not ready yet, leave explicit placeholders with recommended filenames so later projects can fill them in quickly.
+
+For any project created from this template, keep this README style unless the user explicitly asks for a different documentation style.
+
 ## Backend Baseline
 
 - Python 3.10+

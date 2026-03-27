@@ -62,6 +62,15 @@ pnpm --prefix frontend dlx shadcn@latest add <component>
 - Co-locate tests (`*.test.tsx`) near implementation when practical
 - Prefer `userEvent` over `fireEvent` for interactions
 
+## Frontend README notes
+
+If the repository is presented as a template or starter, the top-level README should make the frontend easy to discover.
+
+- Mention the fixed frontend stack in one compact section.
+- Put the main frontend commands in copyable code blocks.
+- Reserve screenshot positions early in the README so generated projects can show UI quickly.
+- Describe directory conventions briefly; leave full implementation rules in `ai_docs/`.
+
 Required checks:
 
 ```bash
