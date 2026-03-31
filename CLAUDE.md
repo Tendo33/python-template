@@ -5,42 +5,50 @@ Use this file as the default project contract for Claude Code.
 ## Workflow
 
 1. Confirm scope and assumptions.
-2. Implement the smallest safe change set.
-3. Verify results with project commands.
-4. Report changes with file paths and rationale.
+2. Read `ai_docs/` before changing code or docs.
+3. Implement the smallest safe change set.
+4. Verify results with project commands.
+5. Update docs whenever behavior, workflows, scripts, or public APIs change.
 
 ## Engineering Rules
 
-- **Read `ai_docs/` for project standards before starting work.**
-- Core contract: `ai_docs/AI_TOOLING_STANDARDS.md` (contains full index of all docs).
-- Backend rules: `ai_docs/BACKEND_STANDARDS.md`.
-- Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`.
-- **Frontend Design System**: `ai_docs/frontend_design/DESIGN_SYSTEM.md` — read before any UI work; update before any UI refactor.
-- Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
+- **Read `ai_docs/AI_TOOLING_STANDARDS.md` first.**
+- Backend rules: `ai_docs/BACKEND_STANDARDS.md`
+- Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`
+- Frontend design contract: `ai_docs/frontend_design/DESIGN_SYSTEM.md`
+- Scripts guide: `ai_docs/SCRIPTS_GUIDE.md`
 - Keep code typed, readable, and modular.
-- Backend code should stay concise, easy to understand, and cleanly structured; avoid clever but opaque abstractions.
+- Backend code should stay concise and easy to scan.
 - Preserve existing project conventions unless asked to change them.
+- Documentation should reflect current reality, not planned structure.
 
 ## Tech Stack
 
 ### Backend
 
-- Python 3.10+ / uv / ruff / pytest
-- FastAPI + Pydantic v2 (when API is needed)
-- SQLAlchemy + Alembic (when persistence is needed)
+- Python 3.10+ / `uv` / `ruff` / `mypy` / `pytest`
+- FastAPI + Pydantic v2 when API work is needed
+- SQLAlchemy + Alembic when persistence is needed
 
 ### Frontend
 
-- **pnpm** (package manager)
+- `pnpm`
 - React + TypeScript + Vite
-- Tailwind CSS + **shadcn/ui** (component library)
+- Tailwind CSS + shadcn/ui
 
-Layout convention:
+Current frontend starter layout:
 
-- `frontend/src/app` — app shell and routing
-- `frontend/src/features/*` — domain modules
-- `frontend/src/components/ui` — shadcn/ui primitives and shared components
-- `frontend/src/lib` — utilities and API wrappers
+- `frontend/src/app`
+- `frontend/src/components`
+- `frontend/src/components/ui`
+- `frontend/src/styles`
+- `frontend/src/test`
+
+Recommended expansion layout once the app grows:
+
+- `frontend/src/features/*`
+- `frontend/src/lib`
+- `frontend/src/hooks`
 
 For backend-focused work, use:
 

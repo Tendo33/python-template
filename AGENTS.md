@@ -4,43 +4,51 @@ Use this file as the default project contract for Codex.
 
 ## Workflow
 
-1. Understand request and constraints.
-2. Propose concise implementation steps.
-3. Implement with minimal, targeted edits.
-4. Run verification commands before completion claims.
+1. Understand the request and the affected parts of the repository.
+2. Read `ai_docs/` before changing code or docs.
+3. Make minimal, targeted changes.
+4. Run relevant verification commands before claiming completion.
+5. If behavior, structure, scripts, or workflows changed, update the docs in the same pass.
 
 ## Engineering Rules
 
-- **Read `ai_docs/` for project standards before starting work.**
-- Core contract: `ai_docs/AI_TOOLING_STANDARDS.md` (contains full index of all docs).
-- Backend rules: `ai_docs/BACKEND_STANDARDS.md`.
-- Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`.
-- **Frontend Design System**: `ai_docs/frontend_design/DESIGN_SYSTEM.md` — read before any UI work; update before any UI refactor.
-- Scripts (rename/version): `ai_docs/SCRIPTS_GUIDE.md`.
+- **Read `ai_docs/AI_TOOLING_STANDARDS.md` first.**
+- Backend rules: `ai_docs/BACKEND_STANDARDS.md`
+- Frontend rules: `ai_docs/FRONTEND_STANDARDS.md`
+- Frontend design contract: `ai_docs/frontend_design/DESIGN_SYSTEM.md`
+- Scripts guide: `ai_docs/SCRIPTS_GUIDE.md`
 - Keep functions small, typed, and testable.
-- Backend code should be concise, readable, and clean; prefer direct solutions over unnecessary abstraction.
-- Handle errors explicitly; avoid silent failures.
+- Backend code should be concise, readable, and direct.
+- Handle errors explicitly; avoid silent failure paths.
+- Documentation must describe the current implementation, not aspirational structure.
 
 ## Tech Stack
 
 ### Backend
 
-- Python 3.10+ / uv / ruff / pytest
-- FastAPI + Pydantic v2 (when API is needed)
-- SQLAlchemy + Alembic (when persistence is needed)
+- Python 3.10+ / `uv` / `ruff` / `mypy` / `pytest`
+- FastAPI + Pydantic v2 when API work is needed
+- SQLAlchemy + Alembic when persistence is needed
 
 ### Frontend
 
-- **pnpm** (package manager)
+- `pnpm`
 - React + TypeScript + Vite
-- Tailwind CSS + **shadcn/ui** (component library)
+- Tailwind CSS + shadcn/ui
 
-Layout convention:
+Current frontend starter layout:
 
-- `frontend/src/app` — app shell and routing
-- `frontend/src/features/*` — domain modules
-- `frontend/src/components/ui` — shadcn/ui primitives and shared components
-- `frontend/src/lib` — utilities and API wrappers
+- `frontend/src/app` — current app entry
+- `frontend/src/components` — shared components
+- `frontend/src/components/ui` — UI primitives
+- `frontend/src/styles` — global styles and tokens
+- `frontend/src/test` — test setup
+
+Recommended expansion layout once the app grows:
+
+- `frontend/src/features/*`
+- `frontend/src/lib`
+- `frontend/src/hooks`
 
 For backend-focused work, use:
 

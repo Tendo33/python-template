@@ -1,66 +1,71 @@
 # AI Tooling Standards
 
-This folder is the single source of truth for AI assistants in this repository.
+`ai_docs/` 是这个仓库给 AI 助手、自动化工具和协作者共用的事实源。
 
-Before starting any implementation task, read `ai_docs/AI_TOOLING_STANDARDS.md` and then open the relevant specialized docs.
+开始任何实现或文档任务前，先读本文件，再按主题打开对应专项文档。
 
-## ai_docs Index
+## ai_docs 索引
 
-| Document | Purpose |
+| 文档 | 作用 |
 | :--- | :--- |
-| `AI_TOOLING_STANDARDS.md` | Global AI workflow and quality gates |
-| `BACKEND_STANDARDS.md` | Backend architecture and API rules |
-| `FRONTEND_STANDARDS.md` | Frontend stack and implementation conventions |
-| `frontend_design/DESIGN_SYSTEM.md` | **Frontend Design System** — 5-layer UI/UX spec (principles → tokens → components → patterns → screens). Read before any frontend UI work. Update before any UI refactor. |
-| `SCRIPTS_GUIDE.md` | Maintenance scripts (`rename_package`, `update_version`, etc.) |
-| `MODELS_GUIDE.md` | Pydantic model conventions |
-| `SETTINGS_GUIDE.md` | Configuration management with pydantic-settings |
-| `SDK_USAGE.md` | `src` layout import/use conventions |
-| `PRE_COMMIT_GUIDE.md` | Git hook quality checks |
+| `AI_TOOLING_STANDARDS.md` | 全局工作流、事实对齐和质量门禁 |
+| `BACKEND_STANDARDS.md` | 后端分层、导入、测试和文档约定 |
+| `FRONTEND_STANDARDS.md` | 前端固定栈、starter 现状与扩展约定 |
+| `frontend_design/DESIGN_SYSTEM.md` | 当前前端视觉 / 交互系统的唯一说明 |
+| `SCRIPTS_GUIDE.md` | 仓库维护脚本与发版脚本说明 |
+| `MODELS_GUIDE.md` | Pydantic v2 模型约定 |
+| `SETTINGS_GUIDE.md` | `pydantic-settings` 配置管理说明 |
+| `SDK_USAGE.md` | `src` 布局下的安装与导入方式 |
+| `PRE_COMMIT_GUIDE.md` | Git hooks 与本地质量检查说明 |
 
-## Shared Workflow
+## 共享工作流
 
-1. Confirm goal and assumptions before coding.
-2. Make minimal, reviewable changes.
-3. Follow project conventions from `ai_docs/`.
-4. Verify before claiming completion.
+1. 先确认目标、作用范围和风险点。
+2. 在改代码前先核对真实实现，不要靠记忆更新文档。
+3. 做最小、可审查的修改。
+4. 改完后运行相关验证。
+5. 如果行为、目录结构、脚本、导出面或工作流变了，顺手更新文档。
 
-## README standard for template-based projects
+## 文档更新原则
 
-When a new project is created from this template, treat `README.md` as a product-facing entry page rather than a plain file index.
+文档过期通常不是因为“没写”，而是因为写了以后没有持续对照代码。这个仓库要求：
 
-Required structure:
+- 文档描述的内容必须能映射到真实文件、真实命令、真实导出。
+- 如果某个目录或能力还没落地，就明确写成“推荐扩展约定”，不要写成“当前已经存在”。
+- `README.md` 负责入口认知，`ai_docs/` 负责工程事实，二者口径必须一致。
+- 前端设计文档不能保留大段 `[待定]` 占位来冒充规范；当前 UI 是什么，就写什么。
+- 示例代码优先选择仓库当前公开 API，而不是历史路径或计划中的理想路径。
 
-1. A clear title and one short subtitle that explains what the project is and who it is for.
-2. A first-screen action area with quick navigation links or badge-style buttons.
-3. A table of contents near the top for fast scanning.
-4. A `Quick Start` section with the shortest path from clone to first successful run.
-5. A `Use This Template` or equivalent setup section for projects generated from this repository.
-6. Screenshot placeholders or real screenshots placed early in the README.
-7. A project structure section that helps new contributors orient quickly.
-8. Verification commands, release workflow, and links to `ai_docs/`.
+## README 标准
 
-Writing rules:
+这个仓库是模板型项目，`README.md` 需要长期满足这些要求：
 
-- Write for humans first. Use natural, direct language and avoid inflated or AI-sounding phrasing.
-- Prefer short paragraphs, concrete statements, and copyable commands.
-- Show the fastest happy path before the full reference material.
-- Keep sections skimmable. A reader should understand the project in less than a minute.
-- Borrow layout ideas from strong open source READMEs when useful, but do not copy their wording or project framing.
-- When screenshots are not ready yet, leave explicit placeholders with recommended filenames so later projects can fill them in quickly.
+1. 顶部一句话说明项目是什么、适合谁。
+2. 首屏有快速导航或 badge。
+3. 顶部附近提供目录。
+4. `Quick Start` 给出从 clone 到首次成功运行的最短路径。
+5. 提供 `Use This Template` 或等价说明。
+6. 早期放置截图位或真实截图。
+7. 说明当前项目结构，不夸大不存在的目录。
+8. 集中列出验证命令、发版流程和 `ai_docs/` 入口。
 
-For any project created from this template, keep this README style unless the user explicitly asks for a different documentation style.
+写作规则：
+
+- 先写人能直接拿来用的信息，再写背景解释。
+- 段落短、命令可复制、避免空泛口号。
+- “当前实现”与“推荐扩展方向”分开写。
+- 如果某部分依赖可选环境变量，明确写出有 / 无配置时的行为差异。
 
 ## Backend Baseline
 
 - Python 3.10+
-- `uv` for dependency and command execution
-- `ruff` for lint + format
-- `pytest` for tests
-- If API is needed: FastAPI + Pydantic v2 + SQLAlchemy + Alembic
-- Backend code must stay concise, readable, and clean. Prefer straightforward designs over clever abstractions, and avoid unnecessary indirection.
+- `uv`
+- `ruff`
+- `mypy`
+- `pytest`
+- FastAPI + Pydantic v2 + SQLAlchemy + Alembic 仅在项目确实需要时引入
 
-Backend verification:
+默认后端验证：
 
 ```bash
 uv run ruff check src tests scripts
@@ -69,17 +74,15 @@ uv run mypy src
 uv run pytest
 ```
 
-See `ai_docs/BACKEND_STANDARDS.md` for details.
-
 ## Frontend Baseline
-
-Fixed stack unless user explicitly overrides:
 
 - `pnpm`
 - React + TypeScript + Vite
-- Tailwind CSS + shadcn/ui
+- Tailwind CSS v4
+- shadcn/ui 风格组件模式
+- Vitest + Testing Library
 
-Frontend verification:
+默认前端验证：
 
 ```bash
 pnpm --prefix frontend lint
@@ -88,13 +91,11 @@ pnpm --prefix frontend test
 pnpm --prefix frontend build
 ```
 
-See `ai_docs/FRONTEND_STANDARDS.md` for details.
-
 ## Definition of Done
 
-A task is done only when:
+一个任务只有在下面条件都满足时才算完成：
 
-- requested behavior is implemented,
-- relevant checks pass,
-- edge cases are addressed,
-- docs/config are updated if behavior or workflow changed.
+- 请求中的行为或文档目标已经落实
+- 相关命令已经验证
+- 文档、配置、脚本说明与当前实现一致
+- 没有继续传播已经过期的目录、导入路径或工作流描述

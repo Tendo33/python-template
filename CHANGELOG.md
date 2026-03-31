@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refreshed `README.md`, `ai_docs/`, `AGENTS.md`, and `CLAUDE.md` to match the current repository layout, public APIs, frontend starter, script behavior, and release workflow.
+- Replaced the placeholder-heavy frontend design system with a concrete description of the current starter UI, token values, components, and extension rules.
+
 ## [0.2.1] - 2026-03-18
 
 ### Changed
