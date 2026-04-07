@@ -63,6 +63,7 @@ Changelog = "https://github.com/Tendo33/python-template/blob/main/CHANGELOG.md"
 exclude = [
     ".bzr",
     ".agent",
+    ".agents",
     ".claude",
     ".codex",
     ".cursor",
@@ -211,6 +212,7 @@ path = "src/python_template/__init__.py"
 [tool.hatch.build.targets.sdist]
 exclude = [
     "/.agent",
+    "/.agents",
     "/.claude",
     "/.codex",
     "/.cursor",

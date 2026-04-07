@@ -180,7 +180,7 @@ python-template/
 └── README.md
 ```
 
-前端目前故意保持为一个很小的 starter。等项目长大后，再按 `ai_docs/FRONTEND_STANDARDS.md` 里的约定引入 `features/`、`lib/`、`hooks/` 等目录。
+前端目前故意保持为一个很小的 starter。等项目长大后，再按 `ai_docs/reference/project-structure.md` 和 `ai_docs/standards/frontend.md` 里的约定扩展目录。
 
 ## Backend
 
@@ -279,7 +279,7 @@ pnpm --prefix frontend build
 | `python scripts/run_vulture.py --min-confidence 80` | 扫描可能未使用的 Python 代码 |
 | `python scripts/generate_release_notes.py --tag v0.2.1 --output .github/release-notes.md` | 生成 release notes |
 
-更多细节见 [ai_docs/SCRIPTS_GUIDE.md](ai_docs/SCRIPTS_GUIDE.md)。
+更多细节见 [ai_docs/current/scripts.md](ai_docs/current/scripts.md)。
 
 ## Verification
 
@@ -314,31 +314,27 @@ pnpm --prefix frontend test
 pnpm --prefix frontend build
 ```
 
-注意：CI 当前会跑 Python 质量检查和前端 `lint` / `typecheck` / `build`；前端测试默认是本地必跑项。
+更详细的验证入口见 [ai_docs/reference/verification.md](ai_docs/reference/verification.md)。CI 当前会跑 Python 质量检查和前端 `lint` / `typecheck` / `build`；前端测试默认是本地必跑项。
 
 ## AI Docs
 
-`ai_docs/` 是模板的重要组成部分。它的职责不是“补充阅读材料”，而是把 AI 助手、未来协作者和你自己都约束在同一套工程事实之上。
+`ai_docs/` 是模板的重要组成部分。它的职责不是“补充阅读材料”，而是作为仓库给 AI 助手和协作者共用的唯一详细事实源。
 
 建议阅读顺序：
 
-1. `ai_docs/AI_TOOLING_STANDARDS.md`
-2. `ai_docs/BACKEND_STANDARDS.md`
-3. `ai_docs/FRONTEND_STANDARDS.md`
-4. `ai_docs/frontend_design/DESIGN_SYSTEM.md`
-5. 专题文档：`MODELS_GUIDE.md`、`SETTINGS_GUIDE.md`、`SDK_USAGE.md`、`SCRIPTS_GUIDE.md`、`PRE_COMMIT_GUIDE.md`
+1. `ai_docs/START_HERE.md`
+2. `ai_docs/INDEX.md`
+3. `ai_docs/current/architecture.md`
+4. `ai_docs/reference/verification.md`
+5. 按任务进入 `ai_docs/current/*`、`ai_docs/standards/*`、`ai_docs/workflows/*`
 
 当前文档覆盖：
 
-- `AI_TOOLING_STANDARDS.md`：全局工作流和文档更新规则
-- `BACKEND_STANDARDS.md`：后端分层、导入和测试基线
-- `FRONTEND_STANDARDS.md`：前端固定栈、starter 现状和扩展约定
-- `frontend_design/DESIGN_SYSTEM.md`：当前 starter UI 的设计系统
-- `MODELS_GUIDE.md`：Pydantic v2 模型约定
-- `SETTINGS_GUIDE.md`：Settings 与 `.env` 配置说明
-- `SDK_USAGE.md`：`src` 布局下的导入方式
-- `SCRIPTS_GUIDE.md`：维护脚本与发版脚本说明
-- `PRE_COMMIT_GUIDE.md`：pre-commit hook 说明
+- `current/`：当前真实实现
+- `standards/`：工程准则和默认约束
+- `workflows/`：任务执行流程
+- `reference/`：共享事实，例如验证命令、目录结构、工具入口
+- `decisions/`：设计决策与架构原因
 
 ## Release
 
