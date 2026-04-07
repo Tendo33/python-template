@@ -11,6 +11,6 @@
 
 ## Claude-specific notes
 
-- Use [.claude/skills/project-development-playbook/SKILL.md](.claude/skills/project-development-playbook/SKILL.md) for general project work
-- Use [.claude/skills/backend-engineering-playbook/SKILL.md](.claude/skills/backend-engineering-playbook/SKILL.md) for backend-heavy tasks
+- Use [AGENTS.md](AGENTS.md) as the shared project entrypoint
+- Route task-specific work through `ai_docs/INDEX.md` and `ai_docs/workflows/`
 - Keep this file thin; detailed rules live in `ai_docs/`

@@ -14,6 +14,8 @@
 - `setup_pre_commit.py`：安装、更新或测试 pre-commit hooks
 - `run_vulture.py`：扫描可能未使用的 Python 代码
 - `generate_release_notes.py`：生成 release notes
+- `sync_ai_adapters.py`：根据 `ai_adapter_config.json` 生成或清理 AI 入口文件
+- `check_ai_docs.py`：校验 `ai_docs/` 与 AI 入口文件是否和配置保持一致
 
 ## Rename and versioning
 

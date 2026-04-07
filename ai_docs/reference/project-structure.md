@@ -23,13 +23,10 @@ python-template/
 │   ├── src/styles/               # Global styles and tokens
 │   └── src/test/                 # Frontend test setup
 ├── ai_docs/                      # Shared AI and engineering docs
-├── .agents/rules/                # Agent rules adapter layer
-├── .claude/skills/               # Claude skill adapter layer
-├── .codex/skills/                # Codex skill adapter layer
-├── .cursor/rules/                # Cursor rules adapter layer
 ├── .github/workflows/            # CI and release workflows
 ├── AGENTS.md                     # Cross-tool root entrypoint
 ├── CLAUDE.md                     # Claude root entrypoint
+├── ai_adapter_config.json        # Generated adapter configuration
 ├── README.md
 └── pyproject.toml
 ```

@@ -33,7 +33,8 @@
 
 ## Adapter file policy
 
-- `AGENTS.md`、`CLAUDE.md`、`.agents/rules/*`、`.cursor/rules/*`、`.claude/skills/*`、`.codex/skills/*` 只做路由
-- adapter 不维护完整目录树
-- adapter 不维护完整验证命令
-- adapter 不维护长篇设计系统或实现说明
+- 当前只维护 `AGENTS.md` 和 `CLAUDE.md` 两个根入口文件
+- 入口文件的启用状态由 `ai_adapter_config.json` 声明
+- 入口文件只做路由
+- 入口文件不维护完整验证命令
+- 入口文件不维护长篇设计系统或实现说明

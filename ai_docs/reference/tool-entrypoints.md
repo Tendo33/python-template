@@ -2,7 +2,7 @@
 
 ## Purpose
 
-本文件集中说明仓库里的 AI 入口文件、adapter 层责任和生成方式。
+本文件集中说明仓库里的 AI 入口文件和生成方式。
 
 ## Root entrypoints
 
@@ -14,32 +14,20 @@
   - Claude Code 项目入口
   - 指向 `AGENTS.md` 和与任务相符的 workflow
 
-## Adapter layers
+## Current scope
 
-- `.agents/rules/*`
-  - 面向通用 agent 规则系统的轻量 adapter
-
-- `.agents/skills/*`
-  - 面向通用 agent skill 系统的轻量 adapter
-
-- `.cursor/rules/*`
-  - 面向 Cursor 的轻量规则入口
-
-- `.cursor/skills/*`
-  - 面向 Cursor skill 系统的轻量 adapter
-
-- `.claude/skills/*`
-  - Claude skills 的路由入口
-
-- `.codex/skills/*`
-  - Codex skills 的路由入口
+- 当前仓库只维护根入口文件：`AGENTS.md` 和 `CLAUDE.md`
+- 不再维护额外的 tool-specific rules 或 skill adapter 目录
+- `ai_adapter_config.json` 是生成目标的显式配置入口
 
 ## Generation policy
 
-- 以上入口和 adapter 由 `scripts/sync_ai_adapters.py` 生成或覆写
+- 以上入口由 `scripts/sync_ai_adapters.py` 生成或覆写
+- 生成哪些入口文件由 `ai_adapter_config.json` 控制
+- 如果配置关闭了某类已生成入口，可运行 `scripts/sync_ai_adapters.py --prune` 清理旧文件
 - 如果需要调整入口结构，先改 `ai_docs/` 和脚本，再重新生成
 - 不要直接手改生成文件中的共享正文
 
 ## Validation policy
 
-- `scripts/check_ai_docs.py` 负责检查入口文件是否存在、是否保持轻量、是否链接到正确的 canonical 文档
+- `scripts/check_ai_docs.py` 复用生成脚本的目标集检查入口文件是否存在、是否保持轻量、是否链接到正确的 canonical 文档

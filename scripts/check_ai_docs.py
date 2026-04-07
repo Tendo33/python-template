@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import re
 from pathlib import Path
 
@@ -30,34 +31,8 @@ FORBIDDEN_LEGACY_PATHS = [
     "ai_docs/PRE_COMMIT_GUIDE.md",
     "ai_docs/frontend_design/DESIGN_SYSTEM.md",
 ]
-ADAPTER_FILES = [
-    "AGENTS.md",
-    "CLAUDE.md",
-    ".agents/rules/project-development.md",
-    ".agents/rules/code-style.md",
-    ".agents/skills/backend-engineering-playbook/SKILL.md",
-    ".agents/skills/project-development-playbook/SKILL.md",
-    ".cursor/rules/project-development-standards.mdc",
-    ".cursor/rules/backend-python-service-standards.mdc",
-    ".cursor/rules/frontend-react-typescript-vite-tailwind.mdc",
-    ".cursor/rules/python-configuration-management.mdc",
-    ".cursor/rules/python-decorator-patterns.mdc",
-    ".cursor/rules/python-error-handling.mdc",
-    ".cursor/rules/python-general-coding-style.mdc",
-    ".cursor/rules/python-logging-practices.mdc",
-    ".cursor/rules/python-performance-optimization.mdc",
-    ".cursor/rules/python-pydantic-models.mdc",
-    ".cursor/rules/python-testing-practices.mdc",
-    ".cursor/rules/python-tooling-standards.mdc",
-    ".cursor/rules/python-utility-structure.mdc",
-    ".cursor/skills/backend-engineering-playbook/SKILL.md",
-    ".cursor/skills/project-development-playbook/SKILL.md",
-    ".claude/skills/backend-engineering-playbook/SKILL.md",
-    ".claude/skills/project-development-playbook/SKILL.md",
-    ".codex/skills/backend-engineering-playbook/SKILL.md",
-    ".codex/skills/project-development-playbook/SKILL.md",
-]
 REQUIRED_DOCS = [
+    "ai_adapter_config.json",
     "ai_docs/START_HERE.md",
     "ai_docs/INDEX.md",
     "ai_docs/current/architecture.md",
@@ -88,6 +63,24 @@ REQUIRED_DOCS = [
 
 def get_repo_root() -> Path:
     return Path(__file__).resolve().parent.parent
+
+
+def load_sync_module():
+    script_path = Path(__file__).with_name("sync_ai_adapters.py")
+    spec = importlib.util.spec_from_file_location("sync_ai_adapters", script_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Unable to load sync_ai_adapters.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def get_adapter_files(root: Path) -> list[str]:
+    sync_module = load_sync_module()
+    return [
+        path.relative_to(root).as_posix()
+        for path in sync_module.list_expected_adapter_files(root)
+    ]
 
 
 def classify_doc(path: Path, root: Path) -> str:
@@ -163,7 +156,7 @@ def resolve_link(path: Path, link: str) -> Path | None:
 
 def check_required_files(root: Path) -> list[str]:
     issues: list[str] = []
-    for relative_path in REQUIRED_DOCS + ADAPTER_FILES:
+    for relative_path in REQUIRED_DOCS + get_adapter_files(root):
         path = root / relative_path
         if not path.exists():
             issues.append(f"Missing required file: {relative_path}")
@@ -227,6 +220,7 @@ def check_legacy_docs(root: Path) -> list[str]:
 
 def check_unique_verification_commands(root: Path) -> list[str]:
     issues: list[str] = []
+    adapter_files = get_adapter_files(root)
     allowed_path = root / "ai_docs" / "reference" / "verification.md"
     for path in iter_ai_markdown(root):
         if path == allowed_path:
@@ -239,7 +233,7 @@ def check_unique_verification_commands(root: Path) -> list[str]:
                     f"{path.relative_to(root)}"
                 )
                 break
-    for relative_path in ADAPTER_FILES:
+    for relative_path in adapter_files:
         content = (root / relative_path).read_text(encoding="utf-8")
         for command in VERIFICATION_COMMANDS:
             if command in content:
@@ -252,7 +246,9 @@ def check_unique_verification_commands(root: Path) -> list[str]:
 
 def check_adapters(root: Path) -> list[str]:
     issues: list[str] = []
-    for relative_path in ADAPTER_FILES:
+    sync_module = load_sync_module()
+    adapter_files = get_adapter_files(root)
+    for relative_path in adapter_files:
         content = (root / relative_path).read_text(encoding="utf-8")
         if GENERATED_MARKER not in content:
             issues.append(f"Adapter missing generated marker: {relative_path}")
@@ -260,14 +256,12 @@ def check_adapters(root: Path) -> list[str]:
             issues.append(f"Adapter missing start routing reference: {relative_path}")
         if "verification.md" not in content:
             issues.append(f"Adapter missing verification reference: {relative_path}")
-    return issues
-
-
-def check_pyproject_alignment(root: Path) -> list[str]:
-    issues: list[str] = []
-    content = (root / "pyproject.toml").read_text(encoding="utf-8")
-    if '".agents"' not in content and "/.agents" not in content:
-        issues.append("pyproject.toml does not reference .agents in exclude lists")
+    stale_files = sync_module.find_stale_generated_files(root)
+    for path in stale_files:
+        issues.append(
+            f"Stale generated adapter should be removed or pruned: "
+            f"{path.relative_to(root).as_posix()}"
+        )
     return issues
 
 
@@ -280,7 +274,6 @@ def collect_issues(root: Path) -> list[str]:
     issues.extend(check_legacy_docs(root))
     issues.extend(check_unique_verification_commands(root))
     issues.extend(check_adapters(root))
-    issues.extend(check_pyproject_alignment(root))
     return issues
 
 

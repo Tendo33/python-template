@@ -40,6 +40,7 @@ pnpm --prefix frontend build
 ```bash
 uv run python scripts/check_ai_docs.py
 uv run python scripts/sync_ai_adapters.py --check
+uv run python scripts/sync_ai_adapters.py --prune
 ```
 
 ## Usage rule
