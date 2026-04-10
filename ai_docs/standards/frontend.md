@@ -4,6 +4,7 @@
 
 - frontend 任务开始前必读。
 - 改 UI 前先读这里，再读设计系统。
+- 如果项目根目录有 `DESIGN.md`，改 UI 前也要一起读，并把它当作视觉实现输入。
 
 ## Fixed stack
 
@@ -23,6 +24,7 @@
 - 当前 starter 还是单页壳层，不要把未来结构写成当前实现
 - 当第二个以上共享组件需要通用工具时，再提取 `frontend/src/lib`
 - 样式优先消费语义 token，不直接硬编码色值
+- 视觉风格优先级为：项目根目录 `DESIGN.md` > `ai_docs/standards/design-system.md` 的默认基线 > 临时发挥
 
 ## TypeScript and UI rules
 

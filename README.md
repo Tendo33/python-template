@@ -258,6 +258,15 @@ frontend/src/
 - 居中的 hero 文案与 CTA
 - 简单页脚
 
+如果要开始新的 UI 设计工作，先按下面流程准备风格输入：
+
+1. 先到 `https://github.com/VoltAgent/awesome-design-md` 选择一个设计风格起点。
+2. 如果没有更明确的参考，可以默认使用 Linear 风格。
+3. 在项目根目录运行 `npx getdesign@latest add linear.app`，安装对应的 `DESIGN.md`。
+4. 然后要求你的 AI assistant 在后续 UI 工作中使用项目根目录的 `DESIGN.md`。
+
+更详细的前端设计流程和约束请看 `ai_docs/standards/design-system.md` 与 `ai_docs/workflows/add-frontend-feature.md`。
+
 常用命令：
 
 ```bash
@@ -327,6 +336,12 @@ pnpm --prefix frontend build
 3. `ai_docs/current/architecture.md`
 4. `ai_docs/reference/verification.md`
 5. 按任务进入 `ai_docs/current/*`、`ai_docs/standards/*`、`ai_docs/workflows/*`
+
+如果任务涉及前端 UI：
+
+- 先看 `ai_docs/standards/design-system.md`
+- 再看 `ai_docs/workflows/add-frontend-feature.md`
+- 如果项目根目录已经有 `DESIGN.md`，把它和上面两份文档一起作为 UI 工作输入
 
 当前文档覆盖：
 
