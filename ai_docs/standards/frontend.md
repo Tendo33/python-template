@@ -22,7 +22,7 @@
 
 - 共享视觉原子优先沿用 shadcn/ui 组件模式
 - 当前 starter 还是单页壳层，不要把未来结构写成当前实现
-- 当第二个以上共享组件需要通用工具时，再提取 `frontend/src/lib`
+- 当第二个以上共享组件需要通用工具时，再继续扩展 `frontend/src/lib`
 - 样式优先消费语义 token，不直接硬编码色值
 - 视觉风格优先级为：项目根目录 `DESIGN.md` > `ai_docs/standards/design-system.md` 的默认基线 > 临时发挥
 
@@ -44,4 +44,4 @@
 - 当前 frontend 现状见 [frontend.md](../current/frontend.md)
 - 项目结构见 [project-structure.md](../reference/project-structure.md)
 - 验证命令见 [verification.md](../reference/verification.md)
-- 设计系统和 workflow 请从 `ai_docs/INDEX.md` 进入
+- 设计系统基线见 [design-system.md](design-system.md)

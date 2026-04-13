@@ -30,7 +30,7 @@
 
 - 当前模型位于 `python_template.models`
 - 对外公共导出在 `python_template.models.__init__`
-- 模板当前提供 `BaseModel`、`TimestampMixin` 和几个示例模型
+- 当前公开导出包括 `BaseModel`、`TimestampMixin`、`User`、`ApiResponse`、`PaginatedResponse`、`ConfigModel`
 
 ## Public imports and SDK usage
 
@@ -50,9 +50,10 @@
 - 当前还没有内建持久化层
 - 当前还没有按业务领域拆开的 service / repository / domain 结构
 
-这些属于后续项目扩展方向，具体约束请从 `ai_docs/INDEX.md` 进入对应 standards 和 workflows。
+这些属于后续项目扩展方向，具体做法以 standards 文档和当前代码现状为准。
 
 ## Shared references
 
+- backend 约束见 [backend.md](../standards/backend.md)
 - 项目结构见 [project-structure.md](../reference/project-structure.md)
 - 验证命令见 [verification.md](../reference/verification.md)

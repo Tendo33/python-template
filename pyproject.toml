@@ -9,10 +9,10 @@ description = "A modern Python project template with loguru, ruff, and uv"
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Tendo33"},
+    {name = "Tendo33", email = "simonsun535@gmail.com"},
 ]
 maintainers = [
-    {name = "Tendo33"},
+    {name = "Tendo33", email = "simonsun535@gmail.com"},
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

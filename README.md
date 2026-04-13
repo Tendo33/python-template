@@ -131,7 +131,7 @@ python scripts/rename_package.py my_new_project
 脚本会同时处理：
 
 - `src/python_template/` 目录重命名
-- 文档、配置、前端文件、AI 配置中的模板名称替换
+- 文档、配置和前端文本文件中的模板名称替换
 - `frontend/package.json` 的 `name`
 - `frontend/index.html` 的 `<title>`
 
@@ -265,7 +265,7 @@ frontend/src/
 3. 在项目根目录运行 `npx getdesign@latest add linear.app`，安装对应的 `DESIGN.md`。
 4. 然后要求你的 AI assistant 在后续 UI 工作中使用项目根目录的 `DESIGN.md`。
 
-更详细的前端设计流程和约束请看 `ai_docs/standards/design-system.md` 与 `ai_docs/workflows/add-frontend-feature.md`。
+更详细的前端设计约束请看 `ai_docs/standards/design-system.md` 与 `ai_docs/standards/frontend.md`。
 
 常用命令：
 
@@ -335,21 +335,19 @@ pnpm --prefix frontend build
 2. `ai_docs/INDEX.md`
 3. `ai_docs/current/architecture.md`
 4. `ai_docs/reference/verification.md`
-5. 按任务进入 `ai_docs/current/*`、`ai_docs/standards/*`、`ai_docs/workflows/*`
+5. 按任务进入 `ai_docs/current/*`、`ai_docs/standards/*`、`ai_docs/reference/*`
 
 如果任务涉及前端 UI：
 
 - 先看 `ai_docs/standards/design-system.md`
-- 再看 `ai_docs/workflows/add-frontend-feature.md`
+- 再看 `ai_docs/standards/frontend.md`
 - 如果项目根目录已经有 `DESIGN.md`，把它和上面两份文档一起作为 UI 工作输入
 
 当前文档覆盖：
 
 - `current/`：当前真实实现
 - `standards/`：工程准则和默认约束
-- `workflows/`：任务执行流程
-- `reference/`：共享事实，例如验证命令、目录结构、工具入口
-- `decisions/`：设计决策与架构原因
+- `reference/`：共享事实，例如验证命令、目录结构和命名规则
 
 ## Release
 

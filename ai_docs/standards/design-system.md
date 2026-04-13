@@ -95,4 +95,4 @@
 ## Shared references
 
 - 当前 frontend 现状见 [frontend.md](../current/frontend.md)
-- 其它 frontend 约束和 workflow 请从 `ai_docs/INDEX.md` 进入
+- 其它 frontend 约束见 [frontend.md](frontend.md)

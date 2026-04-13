@@ -23,5 +23,5 @@
 
 ## Shared references
 
+- 当前脚本现状见 [scripts.md](scripts.md)
 - 验证命令见 [verification.md](../reference/verification.md)
-- 其它阅读路径请从 `ai_docs/INDEX.md` 进入

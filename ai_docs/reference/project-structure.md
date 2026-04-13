@@ -2,7 +2,7 @@
 
 ## Purpose
 
-本文件是项目结构说明的唯一详细事实源。其他文档需要描述目录时，只做用途说明并链接到这里。
+本文件集中说明当前仓库目录结构。其他文档需要引用目录、位置或扩展点时，只链接这里。
 
 ## Current repository shape
 
@@ -18,37 +18,42 @@ python-template/
 ├── tests/                        # Python tests
 ├── scripts/                      # Maintenance and release scripts
 ├── frontend/                     # React + Vite starter
-│   ├── src/app/                  # Current app entry
-│   ├── src/components/           # Shared components and primitives
+│   ├── src/app/                  # Current app entry and page test
+│   ├── src/assets/               # Static starter assets
+│   ├── src/components/           # Shared components and UI primitives
+│   ├── src/features/             # Reserved feature modules (currently empty)
+│   ├── src/hooks/                # Reserved hooks directory (currently empty)
+│   ├── src/lib/                  # Shared frontend utilities
 │   ├── src/styles/               # Global styles and tokens
 │   └── src/test/                 # Frontend test setup
 ├── ai_docs/                      # Shared AI and engineering docs
+│   ├── current/                  # Current implementation facts
+│   ├── standards/                # Working rules and defaults
+│   └── reference/                # Shared commands and structure references
 ├── .github/workflows/            # CI and release workflows
 ├── AGENTS.md                     # Cross-tool root entrypoint
 ├── CLAUDE.md                     # Claude root entrypoint
-├── ai_adapter_config.json        # Generated adapter configuration
 ├── README.md
 └── pyproject.toml
 ```
 
 ## Current frontend starter
 
-- 已存在：`frontend/src/app`
-- 已存在：`frontend/src/components`
-- 已存在：`frontend/src/components/ui`
-- 已存在：`frontend/src/styles`
-- 已存在：`frontend/src/test`
+- 当前页面入口在 `frontend/src/app/App.tsx`
+- 共享组件位于 `frontend/src/components`
+- 当前只有一个稳定的前端通用工具文件：`frontend/src/lib/utils.ts`
+- `frontend/src/features` 和 `frontend/src/hooks` 已建目录，但还没有业务级内容
 
 ## Recommended future expansion
 
-这些目录目前不是当前实现，只是推荐扩展方向：
+如果项目继续长大，优先沿着现有目录扩展，而不是平铺新增顶层目录：
 
-- `frontend/src/features/*`
-- `frontend/src/lib`
-- `frontend/src/hooks`
-- backend 中按项目需要新增 `api`、`service`、`repository`、`domain`
+- 在 `frontend/src/features/*` 下按业务拆分前端模块
+- 在 `frontend/src/hooks` 下沉淀共享 hooks
+- 在 `frontend/src/lib` 下放稳定的通用前端工具
+- backend 再按真实需要引入 `api`、`service`、`repository`、`domain`
 
 ## Usage rule
 
-- 文档里写“当前已经存在什么”时，只能引用 `Current repository shape`
-- 文档里写“未来推荐怎么扩展”时，只能引用 `Recommended future expansion`
+- 描述当前目录现状时，只引用 `Current repository shape`
+- 描述预留扩展方向时，只引用 `Recommended future expansion`
