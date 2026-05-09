@@ -10,18 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.3] - 2026-05-09
 
 ### Changed
-- Migrated AI-facing project documentation from `ai_docs/` to Trellis specs under `.trellis/spec/`.
+- Migrated AI-facing project documentation to Trellis specs under `.trellis/spec/`.
 
 ## [0.2.2] - 2026-04-07
 
 ### Changed
-- Refreshed `README.md`, `ai_docs/`, `AGENTS.md`, and `CLAUDE.md` to match the current repository layout, public APIs, frontend starter, script behavior, and release workflow.
+- Refreshed `README.md`, project docs, `AGENTS.md`, and `CLAUDE.md` to match the current repository layout, public APIs, frontend starter, script behavior, and release workflow.
 - Replaced the placeholder-heavy frontend design system with a concrete description of the current starter UI, token values, components, and extension rules.
 
 ## [0.2.1] - 2026-03-18
 
 ### Changed
-- Documentation refreshed to match current repository state, including unified `ai_docs/` guidance and script usage docs.
+- Documentation refreshed to match current repository state, including unified AI guidance and script usage docs.
 - README updated with frontend setup and verification commands (`pnpm --prefix frontend ...`) and corrected release workflow path.
 - `rename_package.py` now covers frontend assets/config and AI-tooling config files when renaming project/package identifiers.
 - `update_version.py` now updates backend + frontend version targets and auto-detects package directory under `src/`.
