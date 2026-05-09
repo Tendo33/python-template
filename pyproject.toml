@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "python-template"
-version = "0.2.2"
+version = "0.2.3"
 description = "A modern Python project template with loguru, ruff, and uv"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -53,7 +53,7 @@ test = [
 [project.urls]
 Homepage = "https://github.com/Tendo33/python-template"
 Repository = "https://github.com/Tendo33/python-template"
-Documentation = "https://github.com/Tendo33/python-template/tree/main/ai_docs"
+Documentation = "https://github.com/Tendo33/python-template/tree/main/.trellis/spec"
 Changelog = "https://github.com/Tendo33/python-template/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/Tendo33/python-template/issues"
 
@@ -218,9 +218,14 @@ exclude = [
     "/.cursor",
     "/.cursorrules",
     "/.github",
+    "/.trellis",
     "/data",
-    "/ai_docs",
     "/dist",
+    "/frontend/.next",
+    "/frontend/.vite",
+    "/frontend/coverage",
+    "/frontend/dist",
+    "/frontend/node_modules",
     "/tests",
     "/scripts",
     "/examples",

@@ -12,7 +12,7 @@
 [![Quick Start](https://img.shields.io/badge/Quick%20Start-5%20minutes-111827?style=for-the-badge)](#quick-start)
 [![Use This Template](https://img.shields.io/badge/Use%20This%20Template-Get%20Started-2563EB?style=for-the-badge)](#use-this-template)
 [![Project Structure](https://img.shields.io/badge/Project%20Structure-Overview-059669?style=for-the-badge)](#project-structure)
-[![AI Docs](https://img.shields.io/badge/AI%20Docs-Project%20Contract-7C3AED?style=for-the-badge)](#ai-docs)
+[![Trellis Specs](https://img.shields.io/badge/Trellis%20Specs-Project%20Contract-7C3AED?style=for-the-badge)](#trellis-specs)
 
 </div>
 
@@ -27,7 +27,7 @@
 - [Frontend](#frontend)
 - [Scripts](#scripts)
 - [Verification](#verification)
-- [AI Docs](#ai-docs)
+- [Trellis Specs](#trellis-specs)
 - [Release](#release)
 - [License](#license)
 
@@ -39,7 +39,7 @@
 - 前端 starter 已经可运行：React 19 + TypeScript + Vite + Tailwind CSS v4 + shadcn/ui 风格组件
 - 常见基础模块已经拆好：配置、日志、上下文、协议、模型、文件 / JSON / 日期工具
 - 维护动作脚本化：包名重命名、版本更新、pre-commit 安装、无用代码扫描、release notes 生成
-- `ai_docs/` 不是装饰目录，而是给 AI 助手和协作者共用的项目契约
+- `.trellis/spec/` 不是装饰目录，而是给 AI 助手和协作者共用的项目契约
 
 如果你想从一个尽量直接、尽量省心、又不会一上来就堆满过度抽象的仓库起步，这个模板就是为这种场景准备的。
 
@@ -61,7 +61,7 @@
 
 ### Screenshot 4: AI 协作或质量检查流程
 
-推荐路径：`docs/assets/readme/screenshot-ai-docs.png`
+推荐路径：`docs/assets/readme/screenshot-trellis-specs.png`
 
 ## Quick Start
 
@@ -174,13 +174,13 @@ python-template/
 │   ├── src/components/           # 共享组件与 ui primitives
 │   ├── src/styles/               # 全局样式与设计 token
 │   └── src/test/                 # 前端测试初始化
-├── ai_docs/                      # AI / 协作文档与工程规范
+├── .trellis/spec/                # Trellis specs 与项目事实源
 ├── .github/workflows/            # CI 与 release workflow
 ├── pyproject.toml
 └── README.md
 ```
 
-前端目前故意保持为一个很小的 starter。等项目长大后，再按 `ai_docs/reference/project-structure.md` 和 `ai_docs/standards/frontend.md` 里的约定扩展目录。
+前端目前故意保持为一个很小的 starter。等项目长大后，再按 `.trellis/spec/shared/project-structure.md` 和 `.trellis/spec/frontend/index.md` 里的约定扩展目录。
 
 ## Backend
 
@@ -265,7 +265,7 @@ frontend/src/
 3. 在项目根目录运行 `npx getdesign@latest add linear.app`，安装对应的 `DESIGN.md`。
 4. 然后要求你的 AI assistant 在后续 UI 工作中使用项目根目录的 `DESIGN.md`。
 
-更详细的前端设计约束请看 `ai_docs/standards/design-system.md` 与 `ai_docs/standards/frontend.md`。
+更详细的前端设计约束请看 `.trellis/spec/frontend/design-md.md`、`.trellis/spec/frontend/quality.md` 与 `.trellis/spec/frontend/index.md`。
 
 常用命令：
 
@@ -283,12 +283,12 @@ pnpm --prefix frontend build
 | :--- | :--- |
 | `python scripts/rename_package.py --dry-run my_new_project` | 预览模板重命名结果 |
 | `python scripts/rename_package.py my_new_project` | 执行包名与项目名替换 |
-| `python scripts/update_version.py 0.2.2` | 同步更新后端 + 前端版本号 |
+| `python scripts/update_version.py 0.2.3` | 同步更新后端 + 前端版本号 |
 | `python scripts/setup_pre_commit.py --all` | 安装、更新并测试 pre-commit hooks |
 | `python scripts/run_vulture.py --min-confidence 80` | 扫描可能未使用的 Python 代码 |
 | `python scripts/generate_release_notes.py --tag v0.2.1 --output .github/release-notes.md` | 生成 release notes |
 
-更多细节见 [ai_docs/current/scripts.md](ai_docs/current/scripts.md)。
+更多细节见 [.trellis/spec/shared/scripts.md](.trellis/spec/shared/scripts.md)。
 
 ## Verification
 
@@ -323,46 +323,50 @@ pnpm --prefix frontend test
 pnpm --prefix frontend build
 ```
 
-更详细的验证入口见 [ai_docs/reference/verification.md](ai_docs/reference/verification.md)。CI 当前会跑 Python 质量检查和前端 `lint` / `typecheck` / `build`；前端测试默认是本地必跑项。
+更详细的验证入口见 [.trellis/spec/shared/verification.md](.trellis/spec/shared/verification.md)。CI 当前会跑 Python 质量检查和前端 `lint` / `typecheck` / `build`；前端测试默认是本地必跑项。
 
-## AI Docs
+## Trellis Specs
 
-`ai_docs/` 是模板的重要组成部分。它的职责不是“补充阅读材料”，而是作为仓库给 AI 助手和协作者共用的唯一详细事实源。
+`.trellis/spec/` 是模板的重要组成部分。它的职责不是“补充阅读材料”，而是作为仓库给 AI 助手和协作者共用的唯一详细事实源。
 
 建议阅读顺序：
 
-1. `ai_docs/START_HERE.md`
-2. `ai_docs/INDEX.md`
-3. `ai_docs/current/architecture.md`
-4. `ai_docs/reference/verification.md`
-5. 按任务进入 `ai_docs/current/*`、`ai_docs/standards/*`、`ai_docs/reference/*`
+1. `.trellis/spec/README.md`
+2. `.trellis/spec/shared/index.md`
+3. `.trellis/spec/guides/index.md`
+4. `.trellis/spec/shared/architecture.md`
+5. `.trellis/spec/shared/verification.md`
+6. 按任务进入 `.trellis/spec/backend/*`、`.trellis/spec/frontend/*`、`.trellis/spec/shared/*`
 
 如果任务涉及前端 UI：
 
-- 先看 `ai_docs/standards/design-system.md`
-- 再看 `ai_docs/standards/frontend.md`
-- 如果项目根目录已经有 `DESIGN.md`，把它和上面两份文档一起作为 UI 工作输入
+- 先看 `.trellis/spec/frontend/design-md.md`
+- 再看 `.trellis/spec/frontend/index.md`
+- 如果项目根目录已经有 `DESIGN.md`，把它作为 UI 工作的视觉源
 
 当前文档覆盖：
 
-- `current/`：当前真实实现
-- `standards/`：工程准则和默认约束
-- `reference/`：共享事实，例如验证命令、目录结构和命名规则
+- `shared/`：当前架构、目录结构、命名路径、脚本、发版和验证
+- `backend/`：Python package/backend 当前事实和开发约束
+- `frontend/`：React + Vite 当前事实、DESIGN.md 流程和 UI 质量规则
+- `guides/`：任务流程、实现前检查和跨层思考
+- `big-question/`：常见坑位和排查清单
 
 ## Release
 
 推荐发版流程：
 
 ```bash
-python scripts/update_version.py --dry-run 0.2.2
-python scripts/update_version.py 0.2.2
+python scripts/update_version.py --dry-run 0.2.3
+python scripts/update_version.py 0.2.3
 uv run pytest
 pnpm --prefix frontend test
+uv build --out-dir /tmp/python-template-build --clear
 git add -A
-git commit -m "chore: release v0.2.2"
-git tag v0.2.2
+git commit -m "chore: release v0.2.3"
+git tag v0.2.3
 git push origin main
-git push origin v0.2.2
+git push origin v0.2.3
 ```
 
 推送 `v*` tag 后，`.github/workflows/release.yml` 会：
