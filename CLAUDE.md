@@ -3,15 +3,10 @@
 ## Read Order
 
 1. Start at [AGENTS.md](AGENTS.md)
-2. Use [.trellis/spec/README.md](.trellis/spec/README.md) for the Trellis spec overview
-3. Use [.trellis/spec/shared/index.md](.trellis/spec/shared/index.md) for repository-wide facts
-4. Run the relevant section in [.trellis/spec/shared/verification.md](.trellis/spec/shared/verification.md)
 
 ## Claude-Specific Notes
 
 - Use [AGENTS.md](AGENTS.md) as the shared project entrypoint.
-- Route task-specific work through `.trellis/spec/`.
-- Keep this file thin; detailed rules live in `.trellis/spec/`.
 
 ## Claude Execution Style
 
@@ -48,7 +43,6 @@
 
 - For multi-step tasks, keep a brief plan with a verification step for each major change.
 - Prefer tests or direct checks that prove the requested outcome.
-- Before declaring success, run the relevant commands in [.trellis/spec/shared/verification.md](.trellis/spec/shared/verification.md).
 - Translate vague requests into concrete, verifiable goals before implementing.
 - Treat bug fixes as reproduction plus proof of fix.
 - Treat refactors as behavior-preserving changes that must verify before and after.

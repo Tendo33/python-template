@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.3] - 2026-05-09
 
 ### Changed
-- Migrated AI-facing project documentation to Trellis specs under `.trellis/spec/`.
 
 ## [0.2.2] - 2026-04-07
 

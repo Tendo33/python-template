@@ -2,22 +2,12 @@
 
 This file is the cross-tool entrypoint for this repository.
 
-## Read Order
-
-1. Start at [.trellis/spec/README.md](.trellis/spec/README.md)
-2. Use [.trellis/spec/shared/index.md](.trellis/spec/shared/index.md) for repository-wide facts
-3. Use [.trellis/spec/guides/index.md](.trellis/spec/guides/index.md) for task flow
-4. Use [.trellis/spec/shared/verification.md](.trellis/spec/shared/verification.md) before claiming completion
-
 ## Working Rules
 
-- Treat `.trellis/spec/` as the detailed source of truth for AI-assisted work.
 - Read shared facts before layer-specific guidance.
 - Read backend guidance before changing Python package code.
 - Read frontend guidance before changing React/Vite code.
 - Keep changes minimal, typed, and explicit.
-- Update Trellis specs whenever behavior, structure, scripts, adapters, public
-  APIs, or verification commands change.
 
 ## Execution Style
 
@@ -54,7 +44,6 @@ This file is the cross-tool entrypoint for this repository.
 
 - Turn each task into a verifiable outcome.
 - For non-trivial work, keep a short plan and verification path in mind before editing.
-- Use [.trellis/spec/shared/verification.md](.trellis/spec/shared/verification.md) before claiming completion.
 - Translate vague requests into concrete checks whenever possible.
 - Prefer testable targets such as reproducing a bug, proving invalid input fails,
   or confirming behavior before and after a refactor.
