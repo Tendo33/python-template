@@ -7,6 +7,7 @@ management with proper isolation between async tasks.
 用于存储运行时值的上下文管理模块，使用 contextvars 实现异步安全。
 """
 
+import threading
 from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager, contextmanager
 from contextvars import Context as ContextRunner
@@ -365,6 +366,43 @@ def get_global_context() -> Context:
     return _global_context
 
 
+# Scope bookkeeping: a named context registered by a scope is removed only
+# when the last overlapping scope with that name exits, and contexts that
+# existed before any scope opened are never removed by a scope.
+_scope_lock = threading.Lock()
+_scope_refs: dict[str, int] = {}
+_scope_owned: set[str] = set()
+
+
+def _enter_scope(name: str) -> Context:
+    global _context_manager
+    with _scope_lock:
+        if _context_manager is None:
+            _context_manager = ContextManager()
+        refs = _scope_refs.get(name, 0)
+        if refs == 0 and _context_manager.get_context(name) is None:
+            _scope_owned.add(name)
+        _scope_refs[name] = refs + 1
+        return _context_manager.get_or_create_context(name)
+
+
+def _exit_scope(name: str, ctx: Context) -> None:
+    with _scope_lock:
+        refs = _scope_refs.get(name, 0) - 1
+        if refs > 0:
+            _scope_refs[name] = refs
+            return
+        _scope_refs.pop(name, None)
+        owned = name in _scope_owned
+        _scope_owned.discard(name)
+        if (
+            owned
+            and _context_manager is not None
+            and _context_manager.get_context(name) is ctx
+        ):
+            _context_manager.delete_context(name)
+
+
 @contextmanager
 def context_scope(
     name: str, initial_data: dict[str, Any] | None = None
@@ -392,15 +430,13 @@ def context_scope(
         123
         # Context is automatically cleaned up after exiting
     """
-    ctx = get_context(name)
+    ctx = _enter_scope(name)
     if initial_data:
         ctx.update(initial_data)
     try:
         yield ctx
     finally:
-        global _context_manager
-        if _context_manager:
-            _context_manager.delete_context(name)
+        _exit_scope(name, ctx)
 
 
 @asynccontextmanager
@@ -424,15 +460,13 @@ async def async_context_scope(
         ...     print(ctx.get("user_id"))
         123
     """
-    ctx = get_context(name)
+    ctx = _enter_scope(name)
     if initial_data:
         ctx.update(initial_data)
     try:
         yield ctx
     finally:
-        global _context_manager
-        if _context_manager:
-            _context_manager.delete_context(name)
+        _exit_scope(name, ctx)
 
 
 def run_in_context(ctx: Context, func: Any, *args: Any, **kwargs: Any) -> Any:
