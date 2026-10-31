@@ -318,20 +318,12 @@ pnpm --prefix frontend build
 
 
 
-建议阅读顺序：
+文档入口：
 
-
-如果任务涉及前端 UI：
-
-- 如果项目根目录已经有 `DESIGN.md`，把它作为 UI 工作的视觉源
-
-当前文档覆盖：
-
-- `shared/`：当前架构、目录结构、命名路径、脚本、发版和验证
-- `backend/`：Python package/backend 当前事实和开发约束
-- `frontend/`：React + Vite 当前事实、DESIGN.md 流程和 UI 质量规则
-- `guides/`：任务流程、实现前检查和跨层思考
-- `big-question/`：常见坑位和排查清单
+- [`AGENTS.md`](AGENTS.md)：跨工具 agent 入口，工作规则与验证要求
+- [`CLAUDE.md`](CLAUDE.md)：Claude Code 入口，指向 AGENTS.md
+- 本 README：安装、开发、验证与发版
+- 前端 UI 工作若项目根目录有 `DESIGN.md`，以它为视觉源
 
 ## Release
 
