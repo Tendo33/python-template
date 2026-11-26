@@ -1,50 +1,33 @@
-# Project Agent Entrypoint
+# python-template
 
-This file is the cross-tool entrypoint for this repository.
+Python 项目的脚手架模板，不是业务仓库。Python `>=3.10`，后端包 + Vite 前端。
 
-## Working Rules
+模板改动会外溢到已经从这里派生的项目，改结构、改默认依赖、改脚本前先想清楚影响。
 
-- Read shared facts before layer-specific guidance.
-- Read backend guidance before changing Python package code.
-- Read frontend guidance before changing React/Vite code.
-- Keep changes minimal, typed, and explicit.
+## 结构
 
-## Execution Style
+- `src/python_template/`：包代码，按 `config/`、`contracts/`、`core/`、`models/`、`observability/`、`utils/` 分层。
+- `frontend/`：Vite + TypeScript，包管理用 pnpm。
+- `tests/`：`test_public_api.py`、`test_settings.py`、`test_context_scope.py`，以及 `agent_contracts/`、`template_flow/` 两组模板自身行为的用例（测试模板产物的形状，不要随意删）。
+- `scripts/`：`rename_package.py`（派生时改包名）、`update_version.py`、`generate_release_notes.py`、`run_vulture.py`、`setup_pre_commit.py`。
+- `VERSION` 与 `CHANGELOG.md` 要和脚本改法保持一致。
 
-### Think Before Editing
+## 命令
 
-- State assumptions when they affect the implementation.
-- If multiple interpretations exist, surface them instead of choosing silently.
-- Prefer clarifying uncertainty before editing files.
-- If a simpler approach exists, say so before implementing.
-- Push back when warranted instead of mechanically following a weak approach.
-- If something is unclear, stop, name the confusion, and ask.
+```bash
+uv sync
+uv run pytest
+uv run ruff check .
+pnpm --prefix frontend install
+pnpm --prefix frontend run dev
+pnpm --prefix frontend run lint
+pnpm --prefix frontend run typecheck
+pnpm --prefix frontend run test
+pnpm --prefix frontend run build
+```
 
-### Simplicity First
+## 改模板时的规矩
 
-- Choose the smallest change that fully solves the task.
-- Do not add speculative flexibility, configuration, or abstraction.
-- Prefer direct fixes over framework-like restructuring.
-- Do not add features beyond what was asked.
-- Do not create abstractions for single-use code.
-- Do not add error handling for impossible scenarios.
-- If a change grows large but could be much smaller, simplify it before shipping.
-
-### Surgical Diffs
-
-- Touch only files and lines that relate to the request.
-- Match existing project style and terminology.
-- Do not improve adjacent code, comments, or formatting unless required by the task.
-- Do not refactor things that are not broken.
-- If you notice unrelated dead code, mention it instead of deleting it.
-- Remove only the imports, variables, functions, or docs made obsolete by your own change.
-- Every changed line should trace directly to the user's request.
-
-### Goal-Driven Verification
-
-- Turn each task into a verifiable outcome.
-- For non-trivial work, keep a short plan and verification path in mind before editing.
-- Translate vague requests into concrete checks whenever possible.
-- Prefer testable targets such as reproducing a bug, proving invalid input fails,
-  or confirming behavior before and after a refactor.
-- Keep looping until the requested outcome is verified, not just implemented.
+- 优先让模板可派生：占位名要能被 `scripts/rename_package.py` 全部替换干净。
+- 改了 `AGENTS.md` 的结构，同步检查从本模板派生的仓库是否也要更新。
+- 不往模板里塞具体业务逻辑或密钥。
